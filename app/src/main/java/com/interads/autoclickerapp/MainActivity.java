@@ -13,10 +13,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.interads.autoclickerapp.adapter.ListConfigAdapter;
@@ -24,6 +27,8 @@ import com.interads.autoclickerapp.helper.ConfigDataHelper;
 import com.interads.autoclickerapp.model.Config;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     List<Config> configList = new ArrayList<Config>();
     ListConfigAdapter configListAdapter;
     ConfigDataHelper configDataHelper = new ConfigDataHelper(this);
+
+    private static final int LAST_ID_CREATED = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +55,19 @@ public class MainActivity extends AppCompatActivity {
         // get action bar id
         View view = getSupportActionBar().getCustomView();
 
-        // set adapter list view and get data from sqlite
-        configDataHelper = new ConfigDataHelper(getApplicationContext());
-        listViewConfig = (ListView) findViewById(R.id.list_view_config);
-        configListAdapter = new ListConfigAdapter(MainActivity.this,configList);
-
         if (isMyServiceRunning()) {
             stopService(new Intent(MainActivity.this, FloatingControlService.class));
         }
+
+        // action new config
+        ImageView btn_action_refresh = view.findViewById(R.id.btn_action_refresh);
+        btn_action_refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                configList.clear();
+                getDataConfig();
+            }
+        });
 
         // action new config
         ImageView btn_action_new_config = view.findViewById(R.id.btn_action_new_config);
@@ -64,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (checkOverlayDisplayPermission()) {
+                    insertConfig();
                     startService(new Intent(MainActivity.this, FloatingControlService.class));
                     moveTaskToBack(true);
                 } else {
@@ -83,6 +96,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // set adapter list view and get data from sqlite
+        configDataHelper = new ConfigDataHelper(getApplicationContext());
+        listViewConfig = findViewById(R.id.list_view_config);
+        configListAdapter = new ListConfigAdapter(MainActivity.this,configList);
+        listViewConfig.setAdapter(configListAdapter);
+
+        // get data config from sqlite
+        getDataConfig();
     }
 
     private boolean isMyServiceRunning() {
@@ -121,5 +142,38 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return true;
         }
+    }
+
+    private void getDataConfig(){
+        ArrayList<HashMap<String,String>> rows = configDataHelper.getAllData();
+        for(int i = 0; i < rows.size();i++){
+            String id = rows.get(i).get("id");
+            String name = rows.get(i).get("name");
+            String app = rows.get(i).get("app");
+            String date = rows.get(i).get("date");
+            String status = rows.get(i).get("status");
+
+            Config config = new Config(Integer.parseInt(id),name,app,new Boolean(status),new Date(date));
+
+            configList.add(config);
+        }
+        configListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        configList.clear();
+        getDataConfig();
+    }
+
+    private void insertConfig(){
+        Config config = new Config();
+        config.setName("Config");
+        config.setApp("-");
+        config.setDate(new Date());
+        config.setStatus(false);
+
+        configDataHelper.insert(config.getName(),config.getApp(),config.getDate(),config.getStatus());
     }
 }

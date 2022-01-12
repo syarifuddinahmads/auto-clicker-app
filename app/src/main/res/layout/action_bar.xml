@@ -35,6 +35,13 @@
             android:layout_height="match_parent"
             android:src="@drawable/ic_baseline_note_add_24"
             android:layout_marginEnd="6dp"/>
+        <ImageView
+            android:id="@+id/btn_action_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_baseline_refresh_24"
+            android:layout_marginEnd="6dp"
+            android:layout_marginStart="6dp"/>
 
         <ImageView
             android:id="@+id/btn_action_setting"

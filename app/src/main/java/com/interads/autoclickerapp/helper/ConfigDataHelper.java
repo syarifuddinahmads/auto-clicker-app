@@ -92,9 +92,25 @@ public class ConfigDataHelper extends SQLiteOpenHelper {
     }
 
     public void delete(int id){
+        System.out.println("ID Config ===== "+id);
         SQLiteDatabase db = this.getWritableDatabase();
         String SQL = "DELETE FROM "+TABLE_NAME+" WHERE "+COLUMN_ID+"="+"'"+id+"'";
         db.execSQL(SQL);
+        db.close();
+    }
+
+    public void activate_config(int id,Boolean status){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String SQL = "UPDATE "+TABLE_NAME
+                +" SET "+COLUMN_STATUS+"='"+status+"' "
+                +" WHERE "+COLUMN_ID+"='"+id+"'";
+        db.execSQL(SQL);
+
+        String SQL_DEACTIVATE = "UPDATE "+TABLE_NAME
+                +" SET "+COLUMN_STATUS+"='false'"
+                +" WHERE "+COLUMN_ID+"!='"+id+"'";
+        db.execSQL(SQL_DEACTIVATE);
+
         db.close();
     }
 }
