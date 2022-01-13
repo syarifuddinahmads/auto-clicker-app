@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Scenario {
 
-    public int x,xx;
-    public int y,yy;
+    public double x,xx;
+    public double y,yy;
     public String type; // type of action (click or swipe)
     public int time,duration;
 
@@ -22,32 +22,36 @@ public class Scenario {
         this.duration = duration;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public int getXx() {
+    public double getXx() {
         return xx;
     }
 
-    public void setXx(int xx) {
+    public void setXx(double xx) {
         this.xx = xx;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public int getYy() {
+    public double getYy() {
         return yy;
+    }
+
+    public void setYy(double yy) {
+        this.yy = yy;
     }
 
     public void setYy(int yy) {
