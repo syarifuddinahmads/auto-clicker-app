@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (checkOverlayDisplayPermission()) {
-                    insertConfig();
+//                    insertConfig();
                     startService(new Intent(MainActivity.this, FloatingControlService.class));
                     moveTaskToBack(true);
                 } else {

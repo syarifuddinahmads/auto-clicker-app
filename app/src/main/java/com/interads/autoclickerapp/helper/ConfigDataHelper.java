@@ -92,7 +92,6 @@ public class ConfigDataHelper extends SQLiteOpenHelper {
     }
 
     public void delete(int id){
-        System.out.println("ID Config ===== "+id);
         SQLiteDatabase db = this.getWritableDatabase();
         String SQL = "DELETE FROM "+TABLE_NAME+" WHERE "+COLUMN_ID+"="+"'"+id+"'";
         db.execSQL(SQL);
