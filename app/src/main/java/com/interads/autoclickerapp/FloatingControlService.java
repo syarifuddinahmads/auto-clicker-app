@@ -1,8 +1,14 @@
 package com.interads.autoclickerapp;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
@@ -277,18 +283,12 @@ public class FloatingControlService extends Service {
 
     private void addActionSwipe(){
         DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
-        int width = metrics.widthPixels;
-        int height = metrics.heightPixels;
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-
-        // =============================== Start View Group ========================================== //
-        ViewGroup floatStartSwipeView = (ViewGroup) inflater.inflate(R.layout.start_swipe_view, null);
-        floatStartSwipeView.setId(indexChildView);
-        TextView startNumberSwipe = floatStartSwipeView.findViewById(R.id.start_action_swipe);
-        startNumberSwipe.setText(String.valueOf(indexChildView+1));
+        ViewGroup swipeLayoutView = (ViewGroup) inflater.inflate(R.layout.swipe_layout_view,null);
+        swipeLayoutView.setId(indexChildView);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -296,113 +296,39 @@ public class FloatingControlService extends Service {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
-
-        floatWindowLayoutParamStart = new WindowManager.LayoutParams(
-                (int) (width * (0.10f)),
-                (int) (height* (0.1f)),
+        floatWindowLayoutParam = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 LAYOUT_TYPE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
 
-        floatWindowLayoutParamStart.gravity = Gravity.TOP;
-        floatWindowLayoutParamStart.x = 0;
-        floatWindowLayoutParamStart.y = 0;
-        windowManager.addView(floatStartSwipeView,floatWindowLayoutParamStart);
+        floatWindowLayoutParam.gravity = Gravity.CENTER;
+        floatWindowLayoutParam.x = 0;
+        floatWindowLayoutParam.y = 0;
+        windowManager.addView(swipeLayoutView,floatWindowLayoutParam);
 
-        floatStartSwipeView.setOnTouchListener(new View.OnTouchListener() {
+        // add drawing swipe layout to window
+        swipeLayoutView.addView(new DrawingView(getApplicationContext()));
 
-            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = floatWindowLayoutParamStart;
-            double x;
-            double y;
-            double px;
-            double py;
+        // add to list view
+        viewList.add(swipeLayoutView);
 
+        // close draw action view
+        View close_draw_action = (View) swipeLayoutView.findViewById(R.id.close_draw_action);
+        close_draw_action.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        x = floatWindowLayoutUpdateParam.x;
-                        y = floatWindowLayoutUpdateParam.y;
-                        px = event.getRawX();
-                        py = event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        floatWindowLayoutUpdateParam.x = (int) ((x + event.getRawX()) - px);
-                        floatWindowLayoutUpdateParam.y = (int) ((y + event.getRawY()) - py);
-
-                        windowManager.updateViewLayout(floatStartSwipeView, floatWindowLayoutUpdateParam);
-                        break;
+            public void onClick(View view) {
+                if(indexChildView != 0 && indexChildView > 0){
+                    int totalIndexView = viewList.size()-1;
+                    windowManager.removeView(viewList.get(totalIndexView));
+                    viewList.remove(totalIndexView);
+                    indexChildView--;
                 }
-
-                return false;
             }
         });
 
-        // =============================== Start View Group ========================================== //
-
-        // =============================== End View Group ========================================== //
-        ViewGroup floatEndSwipeView = (ViewGroup) inflater.inflate(R.layout.end_swipe_view, null);
-        floatEndSwipeView.setId(indexChildView);
-        TextView endNumberSwipe = floatEndSwipeView.findViewById(R.id.end_action_swipe);
-        endNumberSwipe.setText(String.valueOf(indexChildView+1));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
-        }
-
-
-        floatWindowLayoutParamEnd = new WindowManager.LayoutParams(
-                (int) (width * (0.10f)),
-                (int) (height* (0.1f)),
-                LAYOUT_TYPE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-        );
-
-        floatWindowLayoutParamEnd.gravity = Gravity.CENTER;
-        floatWindowLayoutParamEnd.x = 20;
-        floatWindowLayoutParamEnd.y = 20;
-        windowManager.addView(floatEndSwipeView,floatWindowLayoutParamEnd);
-
-        floatEndSwipeView.setOnTouchListener(new View.OnTouchListener() {
-
-            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = floatWindowLayoutParamEnd;
-            double x;
-            double y;
-            double px;
-            double py;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        x = floatWindowLayoutUpdateParam.x;
-                        y = floatWindowLayoutUpdateParam.y;
-                        px = event.getRawX();
-                        py = event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        floatWindowLayoutUpdateParam.x = (int) ((x + event.getRawX()) - px);
-                        floatWindowLayoutUpdateParam.y = (int) ((y + event.getRawY()) - py);
-
-                        windowManager.updateViewLayout(floatEndSwipeView, floatWindowLayoutUpdateParam);
-                        break;
-                }
-
-                return false;
-            }
-        });
-
-        // =============================== End View Group ========================================== //
-
-
-        viewList.add(floatStartSwipeView);
-        viewList.add(floatEndSwipeView);
     }
 
     private void addScenario(double x, double y, double xx, double yy, String type,int time, int duration){
@@ -428,5 +354,123 @@ public class FloatingControlService extends Service {
         scenario.setType(type);
         scenarioList.set(indexScenario,scenario);
     }
+
+    private void closeSwipeLayout(ViewGroup viewGroupSwipeLayout){
+        if(indexChildView != 0 && indexChildView > 0){
+            int totalIndexView = viewList.size()-1;
+            windowManager.removeView(viewList.get(totalIndexView));
+            viewList.remove(totalIndexView);
+            indexChildView--;
+        }
+    }
+
+    // =============== DRAWING VIEW CLASS =============== //
+    public class DrawingView extends View {
+        private Paint mPaint;
+        public int width;
+        public  int height;
+        private Bitmap mBitmap;
+        private Canvas mCanvas;
+        private Path mPath;
+        private Paint   mBitmapPaint;
+        Context context;
+        private Paint circlePaint;
+        private Path circlePath;
+
+        public DrawingView(Context c) {
+            super(c);
+            context=c;
+            mPath = new Path();
+            mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+            circlePaint = new Paint();
+            circlePath = new Path();
+            circlePaint.setAntiAlias(true);
+            circlePaint.setColor(Color.BLUE);
+            circlePaint.setStyle(Paint.Style.STROKE);
+            circlePaint.setStrokeJoin(Paint.Join.MITER);
+            circlePaint.setStrokeWidth(4f);
+
+            mPaint = new Paint();
+            mPaint.setAntiAlias(true);
+            mPaint.setDither(true);
+            mPaint.setColor(Color.GREEN);
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStrokeJoin(Paint.Join.ROUND);
+            mPaint.setStrokeCap(Paint.Cap.ROUND);
+            mPaint.setStrokeWidth(25);
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh);
+
+            mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBitmap);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
+            canvas.drawPath( mPath,  mPaint);
+            canvas.drawPath( circlePath,  circlePaint);
+        }
+
+        private float mX, mY;
+        private static final float TOUCH_TOLERANCE = 4;
+
+        private void touch_start(float x, float y) {
+            mPath.reset();
+            mPath.moveTo(x, y);
+            mX = x;
+            mY = y;
+        }
+
+        private void touch_move(float x, float y) {
+            float dx = Math.abs(x - mX);
+            float dy = Math.abs(y - mY);
+            if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+                mX = x;
+                mY = y;
+
+                circlePath.reset();
+                circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+            }
+        }
+
+        private void touch_up() {
+            mPath.lineTo(mX, mY);
+            circlePath.reset();
+            // commit the path to our offscreen
+            mCanvas.drawPath(mPath,  mPaint);
+            // kill this so we don't double draw
+            mPath.reset();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            float x = event.getX();
+            float y = event.getY();
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touch_start(x, y);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    touch_move(x, y);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    touch_up();
+                    invalidate();
+                    break;
+            }
+            return true;
+        }
+    }
+
 }
 

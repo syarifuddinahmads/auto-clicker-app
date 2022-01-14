@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:background="#00000075">
 
-    <include layout="@layout/start_swipe_view"/>
+    <ImageView
+        android:id="@+id/close_draw_action"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:src="@drawable/ic_baseline_highlight_off_24"
+        android:layout_margin="1dp"
+        android:layout_gravity="top"/>
 
-    <include layout="@layout/end_swipe_view" />
-
-</RelativeLayout>
+</LinearLayout>
