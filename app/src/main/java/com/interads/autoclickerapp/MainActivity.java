@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
         getDataConfig();
     }
 
-    private void insertConfig(){
+    private void insertConfig() {
         Config config = new Config();
         config.setName("Config");
         config.setApp("-");

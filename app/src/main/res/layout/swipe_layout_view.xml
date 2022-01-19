@@ -1,15 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#00000075">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/cardview_dark_background"
+    android:orientation="vertical"
+    android:gravity="center">
 
-    <ImageView
-        android:id="@+id/close_draw_action"
+    <LinearLayout
+        android:id="@+id/action_swipe_start"
         android:layout_width="35dp"
         android:layout_height="35dp"
-        android:src="@drawable/ic_baseline_highlight_off_24"
-        android:layout_margin="1dp"
-        android:layout_gravity="top"/>
+        android:layout_margin="4dp"
+        android:background="@drawable/ic_start"
+        android:gravity="center"
+        android:layout_marginBottom="14dp">
+
+        <TextView
+            android:id="@+id/start_action_swipe"
+            android:text="N"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action_swipe_end"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_end"
+        android:gravity="center"
+        android:layout_marginTop="14dp">
+
+        <TextView
+            android:id="@+id/end_action_swipe"
+            android:text="N"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
 
 </LinearLayout>
