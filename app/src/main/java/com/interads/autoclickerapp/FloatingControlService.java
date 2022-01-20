@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
@@ -49,7 +50,6 @@ public class FloatingControlService extends Service {
     private int LAYOUT_TYPE;
     private WindowManager.LayoutParams floatWindowLayoutParam;
     private WindowManager windowManager;
-    private Context context;
 
     private ImageView btn_action_play;
     private ImageView btn_action_pause;
@@ -62,9 +62,7 @@ public class FloatingControlService extends Service {
     private ImageView btn_action_add;
 
     private int indexChildView = 0;
-    private int indexChildViewDraw = 0;
-    private ArrayList<ViewGroup> viewList;
-    private ArrayList<ViewGroup> viewListDraw;
+    private ArrayList<ViewGroup> viewList,viewListDrawer;
     private ArrayList<Scenario> scenarioList;
 
     @Override
@@ -72,10 +70,21 @@ public class FloatingControlService extends Service {
         super.onCreate();
 
         viewList = new ArrayList<ViewGroup>();
-        viewListDraw = new ArrayList<ViewGroup>();
+        viewListDrawer = new ArrayList<ViewGroup>();
         scenarioList = new ArrayList<Scenario>();
         // load config floating control view
         floatingControlView();
+
+        // set floating view action id
+        btn_action_play = floatView.findViewById(R.id.action_play);
+        btn_action_pause = floatView.findViewById(R.id.action_pause);
+        btn_action_edit = floatView.findViewById(R.id.action_edit);
+        btn_action_save = floatView.findViewById(R.id.action_save);
+        btn_action_add_swipe = floatView.findViewById(R.id.action_add_swipe);
+        btn_action_add_new_click = floatView.findViewById(R.id.action_new_click);
+        btn_action_minus = floatView.findViewById(R.id.action_minus);
+        btn_action_add = floatView.findViewById(R.id.action_add);
+        btn_action_close = floatView.findViewById(R.id.action_close);
 
         // action close floating control view
         btn_action_close.setOnClickListener(new View.OnClickListener() {
@@ -134,7 +143,6 @@ public class FloatingControlService extends Service {
             @Override
             public void onClick(View view) {
                 addActionDrawSwipe();
-                indexChildView++;
             }
         });
 
@@ -190,17 +198,6 @@ public class FloatingControlService extends Service {
 
         LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         floatView = (ViewGroup) inflater.inflate(R.layout.floating_view, null);
-
-        // set view id
-        btn_action_play = floatView.findViewById(R.id.action_play);
-        btn_action_pause = floatView.findViewById(R.id.action_pause);
-        btn_action_edit = floatView.findViewById(R.id.action_edit);
-        btn_action_save = floatView.findViewById(R.id.action_save);
-        btn_action_add_swipe = floatView.findViewById(R.id.action_add_swipe);
-        btn_action_add_new_click = floatView.findViewById(R.id.action_new_click);
-        btn_action_minus = floatView.findViewById(R.id.action_minus);
-        btn_action_add = floatView.findViewById(R.id.action_add);
-        btn_action_close = floatView.findViewById(R.id.action_close);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -323,17 +320,16 @@ public class FloatingControlService extends Service {
     // === ACTION DRAW SWIPE VIEW === //
     private void addActionDrawSwipe(){
 
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-
-        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        ViewGroup drawSwipeLayoutView = (ViewGroup) inflater.inflate(R.layout.draw_layout_view,null);
-        drawSwipeLayoutView.setId(indexChildViewDraw);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
         }
+
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        ViewGroup drawSwipeLayoutView = (ViewGroup) inflater.inflate(R.layout.draw_layout_view,null);
 
         floatWindowLayoutParam = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -350,37 +346,37 @@ public class FloatingControlService extends Service {
         drawSwipeLayoutView.addView(new DrawingView(getApplicationContext()));
 
         // add to list view
-        viewList.add(drawSwipeLayoutView);
-
+        viewListDrawer.add(drawSwipeLayoutView);
 
 
     }
 
     private void drawSwipePosition(float xStart,float yStart,float xEnd,float yEnd){
 
-        // ===== REMOVE LAST VIEW LAYOUT AFTER DRAW ===== //
-        if(indexChildView != 0 && indexChildView > 0){
-            float totalIndexView = viewList.size()-1;
-            windowManager.removeView(viewList.get((int) totalIndexView));
-            viewList.remove(totalIndexView);
-            indexChildView--;
-        }
-
-        // ===== START POINT SWIPE ===== //
-
-        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        ViewGroup floatSwipeStartView = (ViewGroup) inflater.inflate(R.layout.start_swipe_view, null);
-        floatSwipeStartView.setId(indexChildView);
-        TextView number_action_start = floatSwipeStartView.findViewById(R.id.start_action_swipe);
-        number_action_start.setText(String.valueOf(indexChildView+1));
-
+        // === CHECK SDK SUPPORT === //
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
             LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
+        // === REMOVE CANVAS DRAWER ==== //
+        if(viewListDrawer.size() > 0){
+            windowManager.removeView(viewListDrawer.get(0));
+            viewListDrawer.remove(0);
+        }
 
+        // === PARENT VIEW === //
+        RelativeLayout parentSwipeLayout;
+        parentSwipeLayout = new RelativeLayout(this);
+
+        // === START POINT SWIPE === //
+
+        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        ViewGroup floatSwipeStartView = (ViewGroup) inflater.inflate(R.layout.start_swipe_view, null);
+        floatSwipeStartView.setId(indexChildView);
+        TextView number_action_start = floatSwipeStartView.findViewById(R.id.start_action_swipe);
+        number_action_start.setText(String.valueOf(indexChildView+1));
         WindowManager.LayoutParams floatWindowLayoutParamStart = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -389,25 +385,17 @@ public class FloatingControlService extends Service {
                 PixelFormat.TRANSLUCENT
         );
 
-        floatWindowLayoutParamStart.gravity = Gravity.TOP | Gravity.LEFT;
+        floatWindowLayoutParamStart.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
         floatWindowLayoutParamStart.x = (int) xStart;
         floatWindowLayoutParamStart.y = (int) yStart;
-        windowManager.addView(floatSwipeStartView, floatWindowLayoutParamStart);
+//        windowManager.addView(floatSwipeStartView, floatWindowLayoutParamStart);
 
 
-        // ===== END POINT SWIPE ===== //
+        // === END POINT SWIPE === //
         ViewGroup floatSwipeEndView = (ViewGroup) inflater.inflate(R.layout.end_swipe_view, null);
         floatSwipeEndView.setId(indexChildView);
         TextView number_action_end = floatSwipeEndView.findViewById(R.id.end_action_swipe);
         number_action_end.setText(String.valueOf(indexChildView+1));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
-        }
-
-
         WindowManager.LayoutParams floatWindowLayoutParamEnd = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -416,40 +404,22 @@ public class FloatingControlService extends Service {
                 PixelFormat.TRANSLUCENT
         );
 
-        floatWindowLayoutParamEnd.gravity = Gravity.TOP | Gravity.LEFT;
+
+        floatWindowLayoutParamEnd.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
         floatWindowLayoutParamEnd.x = (int) xEnd;
         floatWindowLayoutParamEnd.y = (int) yEnd;
-        windowManager.addView(floatSwipeEndView, floatWindowLayoutParamEnd);
+//        windowManager.addView(floatSwipeEndView, floatWindowLayoutParamEnd);
 
+        // === PARENT SWIPE POSITION === //
+        int heightParent = (int) yEnd - (int) yStart;
+        int widthParent = (int) xEnd -(int) xStart;
+        parentSwipeLayout.setMinimumHeight(heightParent);
+        parentSwipeLayout.setMinimumWidth(widthParent);
+        parentSwipeLayout.setBackgroundColor(Color.parseColor("#59673AB7"));
+        parentSwipeLayout.addView(floatSwipeStartView,floatWindowLayoutParamStart);
+        parentSwipeLayout.addView(floatSwipeEndView,floatWindowLayoutParamEnd);
 
-
-    }
-
-    private void _drawSwipePosition(float xStart,float yStart,float xEnd,float yEnd,float centerPointWidth,float centerPointHeight){
-
-        float totalIndexView = viewListDraw.size()-1;
-        windowManager.removeView(viewListDraw.get((int) totalIndexView));
-        viewListDraw.remove(totalIndexView);
-
-
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-
-        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        ViewGroup floatClickView = (ViewGroup) inflater.inflate(R.layout.swipe_layout_view, null);
-        floatClickView.setId(indexChildView);
-        TextView number_action_start = floatClickView.findViewById(R.id.start_action_swipe);
-        number_action_start.setText(String.valueOf(indexChildView+1));
-        TextView number_action_end = floatClickView.findViewById(R.id.end_action_swipe);
-        number_action_end.setText(String.valueOf(indexChildView+1));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
-        }
-
-
-        floatWindowLayoutParam = new WindowManager.LayoutParams(
+        WindowManager.LayoutParams floatWindowParentLayoutParam = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 LAYOUT_TYPE,
@@ -457,52 +427,17 @@ public class FloatingControlService extends Service {
                 PixelFormat.TRANSLUCENT
         );
 
-        floatClickView.setMinimumHeight((int)(xEnd));
-        windowManager.addView(floatClickView, floatWindowLayoutParam);
-        addScenario(floatWindowLayoutParam.x,floatWindowLayoutParam.y,0,0,"swipe",0,0);
+        floatWindowParentLayoutParam.gravity = Gravity.TOP | Gravity.LEFT;
+        floatWindowParentLayoutParam.x = (int) xStart;
+        floatWindowParentLayoutParam.y =(int) yStart;
 
-        floatClickView.setOnTouchListener(new View.OnTouchListener() {
-
-            int indexScenario = Integer.parseInt(number_action_start.getText().toString()) - 1;
-            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = floatWindowLayoutParam;
-            double x;
-            double y;
-            double px;
-            double py;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        x = floatWindowLayoutUpdateParam.x;
-                        y = floatWindowLayoutUpdateParam.y;
-                        px = event.getRawX();
-                        py = event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        floatWindowLayoutUpdateParam.x = (int) ((x + event.getRawX()) - px);
-                        floatWindowLayoutUpdateParam.y = (int) ((y + event.getRawY()) - py);
-
-                        windowManager.updateViewLayout(floatClickView, floatWindowLayoutUpdateParam);
-
-                        // update temp scenario list
-                        updateScenario(indexScenario,floatWindowLayoutUpdateParam.x,floatWindowLayoutUpdateParam.y,0,0,"click",0,0);
-
-                        break;
-                }
-
-                return false;
-            }
-        });
-
-        viewList.add(floatClickView);
+        windowManager.addView(parentSwipeLayout,floatWindowParentLayoutParam);
+        viewList.add(parentSwipeLayout);
         indexChildView++;
-
 
     }
 
-    // =============== DRAWING VIEW CLASS =============== //
+    // === DRAWING VIEW CLASS === //
     public class DrawingView extends View {
         private Paint mPaint;
         public int width;
@@ -524,19 +459,19 @@ public class FloatingControlService extends Service {
             circlePaint = new Paint();
             circlePath = new Path();
             circlePaint.setAntiAlias(true);
-            circlePaint.setColor(Color.BLUE);
+            circlePaint.setColor(Color.parseColor("#F9C94F"));
             circlePaint.setStyle(Paint.Style.STROKE);
             circlePaint.setStrokeJoin(Paint.Join.MITER);
-            circlePaint.setStrokeWidth(4f);
+            circlePaint.setStrokeWidth(12f);
 
             mPaint = new Paint();
             mPaint.setAntiAlias(true);
             mPaint.setDither(true);
-            mPaint.setColor(Color.GREEN);
+            mPaint.setColor(Color.parseColor("#9B5DB0"));
             mPaint.setStyle(Paint.Style.STROKE);
             mPaint.setStrokeJoin(Paint.Join.ROUND);
             mPaint.setStrokeCap(Paint.Cap.ROUND);
-            mPaint.setStrokeWidth(25);
+            mPaint.setStrokeWidth(75);
         }
 
         @Override
@@ -557,7 +492,7 @@ public class FloatingControlService extends Service {
 
         // === TOUCH START X,Y COORDINATE === //
         private float mX, mY,xStart,yStart;
-        private static final float TOUCH_TOLERANCE = 2;
+        private static final float TOUCH_TOLERANCE = 0;
 
 
         private void touch_start(float x, float y) {
@@ -646,18 +581,6 @@ public class FloatingControlService extends Service {
         scenario.setYy(yy);
         scenario.setType(type);
         scenarioList.set(indexScenario,scenario);
-
-        for(int i = 0;i< scenarioList.size();i++){
-//            Log.i(FLOAT_CONTROL,"=============== "+i+" ================");
-//            Log.i(FLOAT_CONTROL,"X = "+scenarioList.get(i).getX());
-//            Log.i(FLOAT_CONTROL,"Y = "+scenarioList.get(i).getY());
-//            Log.i(FLOAT_CONTROL,"XX = "+scenarioList.get(i).getXx());
-//            Log.i(FLOAT_CONTROL,"YY = "+scenarioList.get(i).getYy());
-//            Log.i(FLOAT_CONTROL,"Time = "+scenarioList.get(i).getTime());
-//            Log.i(FLOAT_CONTROL,"Duration = "+scenarioList.get(i).getDuration());
-//            Log.i(FLOAT_CONTROL,"Type = "+scenarioList.get(i).getType());
-//            Log.i(FLOAT_CONTROL,"===============================");
-        }
 
     }
 
