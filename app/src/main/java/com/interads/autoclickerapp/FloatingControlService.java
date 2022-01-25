@@ -1,6 +1,8 @@
 package com.interads.autoclickerapp;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -35,13 +37,16 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
+import com.interads.autoclickerapp.dialog.DialogSaveScenario;
 import com.interads.autoclickerapp.model.Config;
 import com.interads.autoclickerapp.model.ConfigDetail;
 import com.interads.autoclickerapp.model.Scenario;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class FloatingControlService extends Service {
 
@@ -68,7 +73,6 @@ public class FloatingControlService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         viewList = new ArrayList<ViewGroup>();
         viewListDrawer = new ArrayList<ViewGroup>();
         scenarioList = new ArrayList<Scenario>();
@@ -125,7 +129,14 @@ public class FloatingControlService extends Service {
         btn_action_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(scenarioList.size() >0){
+                    saveScenario();
+                }else{
+                    Toast toast = new Toast(getApplicationContext());
+                    toast.setGravity(Gravity.CENTER|Gravity.CENTER_VERTICAL,0,0);
+                    toast.setText("Scenario is empty, create scenario before save...");
+                    toast.show();
+                }
             }
         });
 
@@ -150,7 +161,7 @@ public class FloatingControlService extends Service {
         btn_action_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                new PlayScenarioService(scenarioList,"play");
             }
         });
 
@@ -158,7 +169,7 @@ public class FloatingControlService extends Service {
         btn_action_pause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                new PlayScenarioService(scenarioList,"stop");
             }
         });
 
@@ -253,6 +264,12 @@ public class FloatingControlService extends Service {
 
     private void addActionClick(){
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -260,14 +277,6 @@ public class FloatingControlService extends Service {
         floatClickView.setId(indexChildView);
         TextView number_action = floatClickView.findViewById(R.id.number_action_click);
         number_action.setText(String.valueOf(indexChildView+1));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
-        }
-
-
         floatWindowLayoutParam = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -276,8 +285,13 @@ public class FloatingControlService extends Service {
                 PixelFormat.TRANSLUCENT
         );
 
+        floatWindowLayoutParam.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
+        floatWindowLayoutParam.x = 500;
+        floatWindowLayoutParam.y = 1000;
         windowManager.addView(floatClickView, floatWindowLayoutParam);
-        addScenario(floatWindowLayoutParam.x,floatWindowLayoutParam.y,0,0,"click",0,0);
+
+        // === INSERT DATA SCENARIO === //
+        addScenario(floatWindowLayoutParam.x,floatWindowLayoutParam.y,0,0,"click",10,500);
 
         floatClickView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -305,7 +319,7 @@ public class FloatingControlService extends Service {
                         windowManager.updateViewLayout(floatClickView, floatWindowLayoutUpdateParam);
 
                         // update temp scenario list
-                        updateScenario(indexScenario,floatWindowLayoutUpdateParam.x,floatWindowLayoutUpdateParam.y,0,0,"click",0,0);
+                        updateScenario(indexScenario,floatWindowLayoutUpdateParam.x,floatWindowLayoutUpdateParam.y,0,0,"click",10,500);
 
                         break;
                 }
@@ -341,11 +355,7 @@ public class FloatingControlService extends Service {
 
         floatWindowLayoutParam.gravity = Gravity.CENTER;
         windowManager.addView(drawSwipeLayoutView,floatWindowLayoutParam);
-
-        // add drawing swipe layout to window
         drawSwipeLayoutView.addView(new DrawingView(getApplicationContext()));
-
-        // add to list view
         viewListDrawer.add(drawSwipeLayoutView);
 
 
@@ -371,7 +381,6 @@ public class FloatingControlService extends Service {
         parentSwipeLayout = new RelativeLayout(this);
 
         // === START POINT SWIPE === //
-
         LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         ViewGroup floatSwipeStartView = (ViewGroup) inflater.inflate(R.layout.start_swipe_view, null);
         floatSwipeStartView.setId(indexChildView);
@@ -435,6 +444,8 @@ public class FloatingControlService extends Service {
         viewList.add(parentSwipeLayout);
         indexChildView++;
 
+        // === INSERT DATA SCENARIO === //
+        addScenario(floatWindowLayoutParamStart.x,floatWindowLayoutParamStart.y,floatWindowLayoutParamEnd.x,floatWindowLayoutParamEnd.y,"swipe",10,500);
     }
 
     // === DRAWING VIEW CLASS === //
@@ -559,7 +570,7 @@ public class FloatingControlService extends Service {
         }
     }
 
-    private void addScenario(double x, double y, double xx, double yy, String type,int time, int duration){
+    private void addScenario(float x, float y, float xx, float yy, String type,int time, int duration){
         Scenario scenario = new Scenario();
         scenario.setTime(time);
         scenario.setDuration(duration);
@@ -571,7 +582,7 @@ public class FloatingControlService extends Service {
         scenarioList.add(scenario);
     }
 
-    private void updateScenario(int indexScenario,double x, double y, double xx, double yy, String type,int time, int duration){
+    private void updateScenario(int indexScenario,float x, float y, float xx, float yy, String type,int time, int duration){
         Scenario scenario =new Scenario();
         scenario.setTime(time);
         scenario.setDuration(duration);
@@ -581,10 +592,82 @@ public class FloatingControlService extends Service {
         scenario.setYy(yy);
         scenario.setType(type);
         scenarioList.set(indexScenario,scenario);
-
     }
 
+    private void saveScenario(){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_TYPE = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        ViewGroup confirmView = (ViewGroup) inflater.inflate(R.layout.form_save_scenario,null);
+
+        floatWindowLayoutParam = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                LAYOUT_TYPE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        floatWindowLayoutParam.gravity = Gravity.CENTER;
+        windowManager.addView(confirmView,floatWindowLayoutParam);
+
+        EditText nameConfig = confirmView.findViewById(R.id.config_name);
+        Spinner appName = confirmView.findViewById(R.id.app_name);
+        Spinner statusConfig = confirmView.findViewById(R.id.status);
+
+        Button btnCancelSaveConfig  = (Button)confirmView.findViewById(R.id.btn_cancel_save_config);
+        btnCancelSaveConfig.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                windowManager.removeView(confirmView);
+            }
+        });
+
+        Button btnSaveConfig = (Button) confirmView.findViewById(R.id.btn_save_config);
+        btnSaveConfig.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String _nameConfig = nameConfig.getText().toString();
+                String _nameApp =appName.getSelectedItem().toString();
+                Boolean _statusConfig = statusConfig.getSelectedItem().toString().equals("active") ? true:false;
+
+                Config config =new Config();
+                config.setName(_nameConfig);
+                config.setApp(_nameApp);
+                config.setStatus(_statusConfig);
+                config.setDate(new Date());
+                config.setId(0);
+
+                ArrayList<ConfigDetail> configDetailList = new ArrayList<ConfigDetail>();
+                for (int i =0;i<scenarioList.size();i++){
+
+                    Scenario scenario = scenarioList.get(i);
+                    double x = scenario.getX();
+                    double y =  scenario.getY();
+                    double xX = scenario.getXx();
+                    double yY = scenario.getYy();
+                    String type = scenario.getType();
+                    int duration = scenario.getDuration();
+                    int time = scenario.getTime();
+                    int ordeConfig = (i+1);
+
+                    configDetailList.add(new ConfigDetail(config,config.getId(),String.valueOf(x),String.valueOf(y),String.valueOf(xX),String.valueOf(yY),type,ordeConfig,duration,time));
+                }
+
+                config.setConfigDetail(configDetailList);
+            }
+        });
 
 
+
+
+    }
 }
 

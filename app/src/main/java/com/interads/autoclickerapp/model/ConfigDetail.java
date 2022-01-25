@@ -6,16 +6,20 @@ public class ConfigDetail {
     public int idConfig;
     public String x;
     public String y;
+    public String xX;
+    public String yY;
     public String type;
     public int orderConfig;
     public int duration;
     public int time;
 
-    public ConfigDetail(Config config, int idConfig, String x, String y, String type, int orderConfig, int duration, int time) {
+    public ConfigDetail(Config config, int idConfig, String x, String y,String xX, String yY, String type, int orderConfig, int duration, int time) {
         this.config = config;
         this.idConfig = idConfig;
         this.x = x;
         this.y = y;
+        this.xX = xX;
+        this.yY = yY;
         this.type = type;
         this.orderConfig = orderConfig;
         this.duration = duration;
@@ -44,6 +48,22 @@ public class ConfigDetail {
 
     public void setY(String y) {
         this.y = y;
+    }
+
+    public String getxX() {
+        return xX;
+    }
+
+    public void setxX(String xX) {
+        this.xX = xX;
+    }
+
+    public String getyY() {
+        return yY;
+    }
+
+    public void setyY(String yY) {
+        this.yY = yY;
     }
 
     public String getType() {

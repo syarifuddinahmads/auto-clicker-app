@@ -3,16 +3,21 @@ package com.interads.autoclickerapp;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +28,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.interads.autoclickerapp.adapter.ListConfigAdapter;
+import com.interads.autoclickerapp.dialog.DialogSaveScenario;
 import com.interads.autoclickerapp.helper.ConfigDataHelper;
 import com.interads.autoclickerapp.model.Config;
 
@@ -33,19 +39,30 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static String MAIN_ACTIVITY = "Main Activity";
     private AlertDialog alertDialog;
     private ListView listViewConfig;
     List<Config> configList = new ArrayList<Config>();
     ListConfigAdapter configListAdapter;
     ConfigDataHelper configDataHelper = new ConfigDataHelper(this);
-
-    private static final int LAST_ID_CREATED = 0;
+    PackageManager packageManager;
+    List<PackageInfo> listPackageInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // get package install on devices
+        packageManager = getPackageManager();
+        listPackageInfo = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+        for(int i = 0 ; i<listPackageInfo.size();i++){
+            Log.i(MAIN_ACTIVITY,"=============================");
+            Log.i(MAIN_ACTIVITY,"Package === "+listPackageInfo.get(i).packageName.toString());
+            Log.i(MAIN_ACTIVITY,"=============================");
+        }
+
 
         // set header bar and action
         this.getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -58,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         if (isMyServiceRunning()) {
             stopService(new Intent(MainActivity.this, FloatingControlService.class));
         }
+
 
         // action new config
         ImageView btn_action_refresh = view.findViewById(R.id.btn_action_refresh);
@@ -175,5 +193,43 @@ public class MainActivity extends AppCompatActivity {
         config.setStatus(false);
 
         configDataHelper.insert(config.getName(),config.getApp(),config.getDate(),config.getStatus());
+    }
+
+
+    public void showConfirmDialogSaveScenario(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        DialogSaveScenario dialogSaveScenario = DialogSaveScenario.newInstance("Save Scenario");
+        dialogSaveScenario.show(fragmentManager,"from_save_scenario");
+    }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String broadcastType = intent.getStringExtra("broadcast_type");
+
+            switch (broadcastType){
+                case "BOOT_UP":
+                    String packageNameApp = intent.getStringExtra("package_name_app");
+                    openAnotherApp(packageNameApp);
+                    break;
+            }
+
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    public void openAnotherApp(String packageNameApp){
+
+        Intent intent = getPackageManager().getLaunchIntentForPackage(packageNameApp);
+        if(intent.resolveActivity(getApplicationContext().getPackageManager()) != null){
+            startActivity(intent);
+        }
+
     }
 }
