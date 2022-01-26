@@ -1,6 +1,10 @@
 package com.interads.autoclickerapp;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
@@ -23,7 +27,7 @@ import java.util.ArrayList;
 
 public class FloatingControlView extends FrameLayout implements View.OnClickListener {
 
-    private static final String FLOATING_CONTROL_VIEW_TAG = "Floating Control View";
+    private static final String ACTIVITY_TAG = "Floating Control View";
     private Context _context;
     private View floatingControlView;
     private WindowManager _windowManager;
@@ -40,7 +44,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private ImageView btn_action_close;
     private ImageView btn_action_add;
 
-    private int indexChildView = 0;
     private ArrayList<View> viewActionList;
 
     public FloatingControlView(@NonNull Context context) {
@@ -52,7 +55,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         floatingControlView = fcvInflater.inflate(R.layout.floating_control_view,null);
 
-        // set floating view action id
         btn_action_play = floatingControlView.findViewById(R.id.action_play);
         btn_action_pause = floatingControlView.findViewById(R.id.action_pause);
         btn_action_edit = floatingControlView.findViewById(R.id.action_edit);
@@ -74,7 +76,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         btn_action_add.setOnClickListener(this);
         btn_action_close.setOnClickListener(this);
 
-        floatingControlView.setOnTouchListener(_onTouchListener);
         _windowManager = (WindowManager) _context.getSystemService(Context.WINDOW_SERVICE);
     }
 
@@ -108,20 +109,17 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
     public void addActionClick(){
 
-        DisplayMetrics metrics = _context.getResources().getDisplayMetrics();
-        int width = metrics.widthPixels;
-        int height = metrics.heightPixels;
+
+        int indexChildView = viewActionList.size()+1;
 
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View actionClickView = fcvInflater.inflate(R.layout.click_view,null);
         actionClickView.setId(indexChildView);
         TextView number_action = actionClickView.findViewById(R.id.number_action_click);
-        number_action.setText(String.valueOf(indexChildView+1));
+        number_action.setText(String.valueOf(indexChildView));
 
         _layoutParam = new WindowManager.LayoutParams();
-        _layoutParam.gravity = Gravity.TOP | Gravity.LEFT;
-        _layoutParam.x = width/2;
-        _layoutParam.y = height/2;
+        _layoutParam.gravity = Gravity.CENTER;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -147,6 +145,9 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
+                Log.i(ACTIVITY_TAG,"X ========== "+event.getX());
+                Log.i(ACTIVITY_TAG,"Y ========== "+event.getY());
+
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         x = floatWindowLayoutUpdateParam.x;
@@ -171,6 +172,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     }
 
     public void removeView(){
+        int indexChildView = viewActionList.size();
         if(indexChildView != 0 && indexChildView > 0){
             int totalIndexView = viewActionList.size()-1;
             _windowManager.removeView(viewActionList.get(totalIndexView));
@@ -194,7 +196,10 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             case R.id.action_play:
 
                 currentState = ActionControlService.PLAY;
-                Toast.makeText(getContext(), "Play", Toast.LENGTH_LONG).show();
+
+                intent.putExtra(ActionControlService.ACTION, ActionControlService.PLAY);
+                intent.putExtra("x", 100);
+                intent.putExtra("y", 55);
                 break;
             case R.id.action_pause:
                 _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
@@ -202,50 +207,30 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                         WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 currentState = ActionControlService.STOP;
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.STOP);
-                Toast.makeText(getContext(), "Pause", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_close:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.CLOSE);
-                Toast.makeText(getContext(), "Close", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_new_click:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.ADD_TAP);
-                Toast.makeText(getContext(), "Add New Click", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_add_swipe:
-                Toast.makeText(getContext(), "Add New Swipe", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_add:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLUS);
-                Toast.makeText(getContext(), "Plus", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_minus:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.MINUS);
-                Toast.makeText(getContext(), "Minus", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_edit:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.EDIT);
-                Toast.makeText(getContext(), "Edit", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_save:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.SAVE);
-                Toast.makeText(getContext(), "Save", Toast.LENGTH_LONG).show();
                 break;
         }
 
         getContext().startService(intent);
 
     }
-
-    private OnTouchListener _onTouchListener = new OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-
-            switch (motionEvent.getAction()){
-                case MotionEvent.ACTION_DOWN:
-            }
-
-            return true;
-        }
-    };
 }

@@ -1,11 +1,7 @@
 package com.interads.autoclickerapp;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.Fragment;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,19 +9,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,11 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 
-import com.interads.autoclickerapp.dialog.DialogSaveScenario;
 import com.interads.autoclickerapp.model.Config;
 import com.interads.autoclickerapp.model.ConfigDetail;
 import com.interads.autoclickerapp.model.Scenario;
@@ -605,7 +592,7 @@ public class FloatingControlService extends Service {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        ViewGroup confirmView = (ViewGroup) inflater.inflate(R.layout.form_save_scenario,null);
+        ViewGroup confirmView = (ViewGroup) inflater.inflate(R.layout.form_create_scenario,null);
 
         floatWindowLayoutParam = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

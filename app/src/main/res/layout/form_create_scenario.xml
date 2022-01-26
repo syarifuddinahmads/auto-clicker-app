@@ -2,14 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:background="#B3000000"
-    android:padding="50dp">
+    android:layout_gravity="center">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="18dp"
+        android:padding="10dp"
         android:layout_gravity="center_vertical"
         android:orientation="vertical"
         android:background="@color/white">
@@ -29,19 +27,33 @@
             android:layout_marginBottom="12dp"
             android:layout_marginTop="12dp"/>
 
-        <Spinner
-            android:id="@+id/status"
+        <RadioGroup
+            android:id="@+id/status_scenario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
 
+            <RadioButton
+                android:id="@+id/active"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Active" />
+
+            <RadioButton
+                android:id="@+id/inactive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="In Active" />
+
+        </RadioGroup>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
+            android:gravity="right"
             android:layout_marginTop="18dp">
 
 

@@ -13,24 +13,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import com.interads.autoclickerapp.adapter.ListConfigAdapter;
-import com.interads.autoclickerapp.dialog.DialogSaveScenario;
+import com.interads.autoclickerapp.dialog.DialogCreateScenario;
 import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.model.AppInstalled;
 import com.interads.autoclickerapp.model.Config;
 
 import java.util.ArrayList;
@@ -48,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     ConfigDataHelper configDataHelper = new ConfigDataHelper(this);
     PackageManager packageManager;
     List<PackageInfo> listPackageInfo;
+    ArrayList<AppInstalled> appInstalleds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +63,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // get package install on devices
+        appInstalleds = new ArrayList<>();
         packageManager = getPackageManager();
         listPackageInfo = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
         for(int i = 0 ; i<listPackageInfo.size();i++){
             Log.i(MAIN_ACTIVITY,"=============================");
             Log.i(MAIN_ACTIVITY,"Package === "+listPackageInfo.get(i).packageName.toString());
             Log.i(MAIN_ACTIVITY,"=============================");
+
+            appInstalleds.add(new AppInstalled(listPackageInfo.get(i).packageName, listPackageInfo.get(i).packageName));
         }
 
 
@@ -99,18 +98,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if (checkOverlayDisplayPermission()) {
-                    insertConfig();
+                showAlertDialog();
 
-                    Intent intent = new Intent(MainActivity.this, ActionControlService.class);
-                    intent.putExtra(ActionControlService.ACTION, ActionControlService.SHOW);
-                    intent.putExtra("interval", 10);
 
-                    startService(intent);
-                    moveTaskToBack(true);
-                } else {
-                    requestOverlayDisplayPermission();
-                }
+//                if (checkOverlayDisplayPermission()) {
+//
+//                    Intent intent = new Intent(MainActivity.this, ActionControlService.class);
+//                    intent.putExtra(ActionControlService.ACTION, ActionControlService.SHOW);
+//                    intent.putExtra("interval", 10);
+//
+//                    startService(intent);
+//                    moveTaskToBack(true);
+//                } else {
+//                    requestOverlayDisplayPermission();
+//                }
 
 
             }
@@ -152,6 +153,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return true;
         }
+    }
+
+    private void showAlertDialog() {
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        DialogCreateScenario alertDialog = DialogCreateScenario.newInstance(appInstalleds);
+        alertDialog.show(fragmentManager, DialogCreateScenario.ACTIVITY_TAG);
+
     }
 
     private void getDataConfig(){

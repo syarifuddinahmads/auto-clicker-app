@@ -2,7 +2,9 @@ package com.interads.autoclickerapp;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
+import android.app.Activity;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Path;
 import android.os.Handler;
@@ -27,11 +29,13 @@ public class ActionControlService extends AccessibilityService {
     public static final String ADD_SWIPE = "add_swipe";
     public static final String PLUS = "plus";
     public static final String MINUS = "minus";
-    public static final String EDIT = "minus";
-    public static final String SAVE = "minus";
+    public static final String EDIT = "edit";
+    public static final String SAVE = "save";
     public String _mode;
     private FloatingControlView floatingControlView;
     private int _interval;
+    private int mX;
+    private int mY;
 
     private Handler _handler;
     private IntervaRunnable _intervaRunnable;
@@ -79,6 +83,9 @@ public class ActionControlService extends AccessibilityService {
 
                 Log.i(ACTIVITY_TAG,"PLAY");
 
+                mX = intent.getIntExtra("x", 0);
+                mY = intent.getIntExtra("y", 0);
+
                 if (_intervaRunnable == null){
                     _intervaRunnable = new IntervaRunnable();
                 }
@@ -105,8 +112,7 @@ public class ActionControlService extends AccessibilityService {
                 _handler.removeCallbacksAndMessages(null);
             }else if(SAVE.equals(action)){
 
-                Log.i(ACTIVITY_TAG,"PLUS");
-                floatingControlView.addActionClick();
+                Log.i(ACTIVITY_TAG,"Save");
                 _handler.removeCallbacksAndMessages(null);
             }else if(EDIT.equals(action)){
 
@@ -152,7 +158,7 @@ public class ActionControlService extends AccessibilityService {
 
         @Override
         public void run() {
-
+            Tapping(mX, mY);
         }
     }
 
