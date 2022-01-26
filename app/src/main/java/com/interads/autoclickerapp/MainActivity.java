@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,6 +52,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        if (!Settings.canDrawOverlays(this)) {
+            int REQUEST_CODE_101 = 101;
+            Intent overlayPermission = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            overlayPermission.setData(Uri.parse("package:" + getPackageName()));
+            startActivityForResult(overlayPermission, REQUEST_CODE_101);
+
+            int REQUEST_CODE_102 = 102;
+            Intent accessibilitySetting = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            startActivityForResult(accessibilitySetting, REQUEST_CODE_102);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -69,13 +81,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        // get action bar id
         View view = getSupportActionBar().getCustomView();
-
-        if (isMyServiceRunning()) {
-            stopService(new Intent(MainActivity.this, FloatingControlService.class));
-        }
-
 
         // action new config
         ImageView btn_action_refresh = view.findViewById(R.id.btn_action_refresh);
@@ -94,23 +100,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (checkOverlayDisplayPermission()) {
-//                    insertConfig();
-                    startService(new Intent(MainActivity.this, FloatingControlService.class));
+                    insertConfig();
+
+                    Intent intent = new Intent(MainActivity.this, ActionControlService.class);
+                    intent.putExtra(ActionControlService.ACTION, ActionControlService.SHOW);
+                    intent.putExtra("interval", 10);
+
+                    startService(intent);
                     moveTaskToBack(true);
                 } else {
                     requestOverlayDisplayPermission();
                 }
 
 
-            }
-        });
-
-        // action setting
-        ImageView btn_action_setting = view.findViewById(R.id.btn_action_setting);
-        btn_action_setting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(MainActivity.this,"Setting",Toast.LENGTH_LONG).show();
             }
         });
 
@@ -122,16 +124,6 @@ public class MainActivity extends AppCompatActivity {
 
         // get data config from sqlite
         getDataConfig();
-    }
-
-    private boolean isMyServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (FloatingControlService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void requestOverlayDisplayPermission() {
@@ -195,24 +187,21 @@ public class MainActivity extends AppCompatActivity {
         configDataHelper.insert(config.getName(),config.getApp(),config.getDate(),config.getStatus());
     }
 
-
-    public void showConfirmDialogSaveScenario(){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        DialogSaveScenario dialogSaveScenario = DialogSaveScenario.newInstance("Save Scenario");
-        dialogSaveScenario.show(fragmentManager,"from_save_scenario");
-    }
-
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             String broadcastType = intent.getStringExtra("broadcast_type");
+            String packageNameApp = intent.getStringExtra("package_name_app");
 
             switch (broadcastType){
                 case "BOOT_UP":
-                    String packageNameApp = intent.getStringExtra("package_name_app");
                     openAnotherApp(packageNameApp);
                     break;
+            }
+
+            if(isForeground(context,packageNameApp)){
+                // run config scenario
             }
 
         }
@@ -225,11 +214,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openAnotherApp(String packageNameApp){
-
         Intent intent = getPackageManager().getLaunchIntentForPackage(packageNameApp);
         if(intent.resolveActivity(getApplicationContext().getPackageManager()) != null){
             startActivity(intent);
         }
-
     }
+
+    public static boolean isForeground(Context ctx, String packageNameApp){
+        ActivityManager manager = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
+        List< ActivityManager.RunningTaskInfo > runningTaskInfo = manager.getRunningTasks(1);
+
+        ComponentName componentInfo = runningTaskInfo.get(0).topActivity;
+        if(componentInfo.getPackageName().equals(packageNameApp)) {
+            return true;
+        }
+        return false;
+    }
+
 }

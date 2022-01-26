@@ -32,11 +32,7 @@ public class BootUpReceiver extends BroadcastReceiver {
 
         // check config status app
         // format data params intent
-        // {
-        //      status_config_app:Boolean,
-        //      package_name_app:String,
-        //      broadcast_type:String
-        // }
+        // {status_config_app:Boolean,package_name_app:String,broadcast_type:String}
         if(!packageNameApp.equals("") && statusConfigApp == true){
             Intent intentApp = new Intent(context,MainActivity.class);
             intentApp.putExtra("status_config_app",statusConfigApp);
