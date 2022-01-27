@@ -332,6 +332,11 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             _windowManager.removeView(viewActionList.get(i));
         }
         _windowManager.removeView(floatingControlView);
+
+        Intent main_intent = new Intent(getContext(),MainActivity.class);
+        main_intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        getContext().startActivity(main_intent);
+
     }
 
     @Override
@@ -342,10 +347,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             case R.id.action_play:
 
                 currentState = ActionControlService.PLAY;
-
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLAY);
-                intent.putExtra("x", 100);
-                intent.putExtra("y", 55);
                 break;
             case R.id.action_pause:
                 _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |

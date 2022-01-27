@@ -173,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
     }
 
     public void openAnotherApp(String packageNameApp){

@@ -15,6 +15,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
 import com.interads.autoclickerapp.FloatingControlView;
+import com.interads.autoclickerapp.model.Scenario;
 
 public class ActionControlService extends AccessibilityService {
     public static final String ACTIVITY_TAG = "Auto Control Service";
@@ -36,8 +37,6 @@ public class ActionControlService extends AccessibilityService {
     public String _mode;
     private FloatingControlView floatingControlView;
     private int _interval;
-    private int mX;
-    private int mY;
 
     private Handler _handler;
     private IntervaRunnable _intervaRunnable;
@@ -85,9 +84,6 @@ public class ActionControlService extends AccessibilityService {
 
                 Log.i(ACTIVITY_TAG,"PLAY");
 
-                mX = intent.getIntExtra("x", 0);
-                mY = intent.getIntExtra("y", 0);
-
                 if (_intervaRunnable == null){
                     _intervaRunnable = new IntervaRunnable();
                 }
@@ -107,12 +103,10 @@ public class ActionControlService extends AccessibilityService {
                 floatingControlView.addActionDrawSwipe();
                 _handler.removeCallbacksAndMessages(null);
             }else if(PLUS.equals(action)){
-
                 Log.i(ACTIVITY_TAG,"PLUS");
                 floatingControlView.addActionClick();
                 _handler.removeCallbacksAndMessages(null);
             }else if(MINUS.equals(action)){
-
                 Log.i(ACTIVITY_TAG,"MINUS");
                 floatingControlView.removeView();
                 _handler.removeCallbacksAndMessages(null);
@@ -122,7 +116,7 @@ public class ActionControlService extends AccessibilityService {
                 _handler.removeCallbacksAndMessages(null);
             }else if(EDIT.equals(action)){
 
-                Log.i(ACTIVITY_TAG,"MINUS");
+                Log.i(ACTIVITY_TAG,"Edit");
                 floatingControlView.removeView();
                 _handler.removeCallbacksAndMessages(null);
             }
@@ -133,11 +127,11 @@ public class ActionControlService extends AccessibilityService {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void Tapping(int x, int y) {
+    private void Tapping(Scenario scenario) {
         Path path = new Path();
-        path.moveTo(x, y);
+        path.moveTo(scenario.getX(), scenario.getY());
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, 0, 50);
+        GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration());
         builder.addStroke(clickstroke);
         GestureDescription gestureDescription = builder.build();
         Log.e(ACTIVITY_TAG,"built.");
@@ -160,11 +154,31 @@ public class ActionControlService extends AccessibilityService {
         Log.e(ACTIVITY_TAG,"The result is " + isDispatch);
     }
 
+    private void Swipe(Scenario scenario){
+
+        GestureDescription.Builder builder = new GestureDescription.Builder();
+        Path path = new Path();
+
+        path.moveTo(scenario.getX(),scenario.getY());
+        path.lineTo(scenario.getXx(),scenario.getYy());
+
+        builder.addStroke(new GestureDescription.StrokeDescription(path,scenario.getTime(),scenario.getDuration()));
+        boolean isDispatch = dispatchGesture(builder.build(), new GestureResultCallback() {
+            @Override
+            public void onCompleted(GestureDescription gestureDescription) {
+                Log.i(ACTIVITY_TAG,"Gesture Completed");
+                super.onCompleted(gestureDescription);
+            }
+        }, null);
+
+        Log.e(ACTIVITY_TAG,"Result Swipe " + isDispatch);
+    }
+
     private  class IntervaRunnable implements Runnable{
 
         @Override
         public void run() {
-            Tapping(mX, mY);
+
         }
     }
 
