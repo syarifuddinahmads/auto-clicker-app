@@ -67,10 +67,6 @@ public class MainActivity extends AppCompatActivity {
         packageManager = getPackageManager();
         listPackageInfo = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
         for(int i = 0 ; i<listPackageInfo.size();i++){
-            Log.i(MAIN_ACTIVITY,"=============================");
-            Log.i(MAIN_ACTIVITY,"Package === "+listPackageInfo.get(i).packageName.toString());
-            Log.i(MAIN_ACTIVITY,"=============================");
-
             appInstalleds.add(new AppInstalled(listPackageInfo.get(i).packageName, listPackageInfo.get(i).packageName));
         }
 

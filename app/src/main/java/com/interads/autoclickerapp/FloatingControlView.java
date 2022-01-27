@@ -1,11 +1,12 @@
 package com.interads.autoclickerapp;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.DisplayMetrics;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +27,7 @@ import androidx.annotation.NonNull;
 
 import com.interads.autoclickerapp.helper.ConfigDataHelper;
 import com.interads.autoclickerapp.model.Config;
+import com.interads.autoclickerapp.service.ActionControlService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +55,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private ImageView btn_action_add;
 
     private ArrayList<View> viewActionList;
+    private ArrayList<View> viewDrawerList;
 
     public FloatingControlView(@NonNull Context context) {
         super(context);
@@ -66,15 +70,11 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         String status = rows.get(lastRow).get("status");
 
         lastConfig = new Config(Integer.parseInt(id),name,app,new Boolean(status),new Date(date));
-        Log.i(ACTIVITY_TAG,"ID = "+id);
-        Log.i(ACTIVITY_TAG,"Name = "+name);
-        Log.i(ACTIVITY_TAG,"App = "+app);
-        Log.i(ACTIVITY_TAG,"Date = "+date);
-        Log.i(ACTIVITY_TAG,"Status = "+status);
 
 
         _context = context.getApplicationContext();
         viewActionList = new ArrayList<View>();
+        viewDrawerList = new ArrayList<View>();
 
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         floatingControlView = fcvInflater.inflate(R.layout.floating_control_view,null);
@@ -192,7 +192,129 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             }
         });
 
+        actionClickView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "Click click ninuninuninu.", Toast.LENGTH_LONG).show();
+
+            }
+        });
+
         viewActionList.add(actionClickView);
+    }
+
+    public void addActionDrawSwipe(){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup drawSwipeLayoutView = (ViewGroup) inflater.inflate(R.layout.draw_layout_view,null);
+
+        _layoutParam = new WindowManager.LayoutParams();
+        _layoutParam.gravity = Gravity.CENTER;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        _layoutParam.format = PixelFormat.RGBA_8888;
+        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        _layoutParam.width = LayoutParams.MATCH_PARENT;
+        _layoutParam.height = LayoutParams.MATCH_PARENT;
+
+        _windowManager.addView(drawSwipeLayoutView,_layoutParam);
+        drawSwipeLayoutView.addView(new DrawingView(getContext()));
+        viewDrawerList.add(drawSwipeLayoutView);
+
+
+    }
+
+    private void drawSwipePosition(float xStart,float yStart,float xEnd,float yEnd){
+
+        Log.i(ACTIVITY_TAG,"======== After Draw ====== ");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        if(viewDrawerList.size() > 0){
+            _windowManager.removeView(viewDrawerList.get(0));
+            viewDrawerList.remove(0);
+        }
+
+        int indexChildView = viewActionList.size()+1;
+
+        RelativeLayout parentSwipeLayout;
+        parentSwipeLayout = new RelativeLayout(getContext());
+
+        LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup floatSwipeStartView = (ViewGroup) inflater.inflate(R.layout.start_swipe_view, null);
+        floatSwipeStartView.setId(indexChildView);
+        TextView number_action_start = floatSwipeStartView.findViewById(R.id.start_action_swipe);
+        number_action_start.setText(String.valueOf(indexChildView));
+
+        WindowManager.LayoutParams floatWindowLayoutParamStart = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                _layoutParam.type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        floatWindowLayoutParamStart.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
+        floatWindowLayoutParamStart.x = (int) xStart;
+        floatWindowLayoutParamStart.y = (int) yStart;
+
+
+        ViewGroup floatSwipeEndView = (ViewGroup) inflater.inflate(R.layout.end_swipe_view, null);
+        floatSwipeEndView.setId(indexChildView);
+        TextView number_action_end = floatSwipeEndView.findViewById(R.id.end_action_swipe);
+        number_action_end.setText(String.valueOf(indexChildView));
+        WindowManager.LayoutParams floatWindowLayoutParamEnd = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                _layoutParam.type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+
+        floatWindowLayoutParamEnd.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
+        floatWindowLayoutParamEnd.x = (int) xEnd;
+        floatWindowLayoutParamEnd.y = (int) yEnd;
+
+        // === PARENT SWIPE POSITION === //
+        int heightParent = (int) yEnd - (int) yStart;
+        int widthParent = (int) xEnd -(int) xStart;
+        parentSwipeLayout.setMinimumHeight(heightParent);
+        parentSwipeLayout.setMinimumWidth(widthParent);
+        parentSwipeLayout.setBackgroundColor(Color.parseColor("#59673AB7"));
+        parentSwipeLayout.addView(floatSwipeStartView,floatWindowLayoutParamStart);
+        parentSwipeLayout.addView(floatSwipeEndView,floatWindowLayoutParamEnd);
+
+        WindowManager.LayoutParams floatWindowParentLayoutParam = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                _layoutParam.type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        floatWindowParentLayoutParam.gravity = Gravity.TOP | Gravity.LEFT;
+        floatWindowParentLayoutParam.x = (int) xStart;
+        floatWindowParentLayoutParam.y =(int) yStart;
+
+        _windowManager.addView(parentSwipeLayout,floatWindowParentLayoutParam);
+        viewActionList.add(parentSwipeLayout);
     }
 
     public void removeView(){
@@ -215,7 +337,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     @Override
     public void onClick(View view) {
 
-        Intent intent = new Intent(getContext(),ActionControlService.class);
+        Intent intent = new Intent(getContext(), ActionControlService.class);
         switch (view.getId()){
             case R.id.action_play:
 
@@ -239,6 +361,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.ADD_TAP);
                 break;
             case R.id.action_add_swipe:
+                intent.putExtra(ActionControlService.ACTION, ActionControlService.ADD_SWIPE);
                 break;
             case R.id.action_add:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLUS);
@@ -256,5 +379,120 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
         getContext().startService(intent);
 
+    }
+
+    public class DrawingView extends View {
+        private Paint mPaint;
+        public int width;
+        public  int height;
+        private Bitmap mBitmap;
+        private Canvas mCanvas;
+        private Path mPath;
+        private Paint   mBitmapPaint;
+        Context context;
+        private Paint circlePaint;
+        private Path circlePath;
+
+        public DrawingView(Context c) {
+            super(c);
+
+            context=c;
+            mPath = new Path();
+            mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+            circlePaint = new Paint();
+            circlePath = new Path();
+            circlePaint.setAntiAlias(true);
+            circlePaint.setColor(Color.parseColor("#F9C94F"));
+            circlePaint.setStyle(Paint.Style.STROKE);
+            circlePaint.setStrokeJoin(Paint.Join.MITER);
+            circlePaint.setStrokeWidth(12f);
+
+            mPaint = new Paint();
+            mPaint.setAntiAlias(true);
+            mPaint.setDither(true);
+            mPaint.setColor(Color.parseColor("#9B5DB0"));
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStrokeJoin(Paint.Join.ROUND);
+            mPaint.setStrokeCap(Paint.Cap.ROUND);
+            mPaint.setStrokeWidth(75);
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh);
+
+            mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBitmap);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
+            canvas.drawPath( mPath,  mPaint);
+            canvas.drawPath( circlePath,  circlePaint);
+        }
+
+        // === TOUCH START X,Y COORDINATE === //
+        private float mX, mY,xStart,yStart;
+        private static final float TOUCH_TOLERANCE = 0;
+
+
+        private void touch_start(float x, float y) {
+            mPath.reset();
+            mPath.moveTo(x, y);
+            mX = x;
+            mY = y;
+            xStart = x;
+            yStart = y;
+        }
+
+        private void touch_move(float x, float y) {
+            float dx = Math.abs(x - mX);
+            float dy = Math.abs(y - mY);
+            if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+                mX = x;
+                mY = y;
+
+                circlePath.reset();
+                circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+            }
+        }
+
+        private void touch_up() {
+            mPath.lineTo(mX, mY);
+            circlePath.reset();
+            // commit the path to our offscreen
+            mCanvas.drawPath(mPath,  mPaint);
+            // kill this so we don't double draw
+            mPath.reset();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            float x = event.getX();
+            float y = event.getY();
+
+            Log.i(ACTIVITY_TAG,"X ========= "+x);
+            Log.i(ACTIVITY_TAG,"Y ========= "+y);
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touch_start(x, y);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    touch_move(x, y);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    touch_up();
+                    invalidate();
+                    drawSwipePosition((int) xStart,(int) yStart,(int) x,(int) y);
+                    break;
+            }
+            return true;
+        }
     }
 }

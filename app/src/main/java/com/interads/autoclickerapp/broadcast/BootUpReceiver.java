@@ -1,10 +1,11 @@
-package com.interads.autoclickerapp;
+package com.interads.autoclickerapp.broadcast;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.interads.autoclickerapp.MainActivity;
 import com.interads.autoclickerapp.helper.ConfigDataHelper;
 import com.interads.autoclickerapp.model.Config;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class BootUpReceiver extends BroadcastReceiver {
-    private static String BOOT_UP_RECEIVER = "Boot Up Receiver";
+    private static String ACTIVITY_TAG = "Boot Up Receiver";
     ConfigDataHelper configDataHelper = new ConfigDataHelper(null);
 
     @Override
@@ -34,7 +35,7 @@ public class BootUpReceiver extends BroadcastReceiver {
         // format data params intent
         // {status_config_app:Boolean,package_name_app:String,broadcast_type:String}
         if(!packageNameApp.equals("") && statusConfigApp == true){
-            Intent intentApp = new Intent(context,MainActivity.class);
+            Intent intentApp = new Intent(context, MainActivity.class);
             intentApp.putExtra("status_config_app",statusConfigApp);
             intentApp.putExtra("package_name_app",packageNameApp);
             intentApp.putExtra("broadcast_type","BOOT_UP");

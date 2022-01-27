@@ -1,4 +1,4 @@
-package com.interads.autoclickerapp;
+package com.interads.autoclickerapp.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
@@ -13,6 +13,8 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
+
+import com.interads.autoclickerapp.FloatingControlView;
 
 public class ActionControlService extends AccessibilityService {
     public static final String ACTIVITY_TAG = "Auto Control Service";
@@ -99,6 +101,10 @@ public class ActionControlService extends AccessibilityService {
 
                 Log.i(ACTIVITY_TAG,"ADD ACTION TAP");
                 floatingControlView.addActionClick();
+                _handler.removeCallbacksAndMessages(null);
+            }else if(ADD_SWIPE.equals(action)){
+                Log.i(ACTIVITY_TAG,"ADD ACTION SWIPE");
+                floatingControlView.addActionDrawSwipe();
                 _handler.removeCallbacksAndMessages(null);
             }else if(PLUS.equals(action)){
 

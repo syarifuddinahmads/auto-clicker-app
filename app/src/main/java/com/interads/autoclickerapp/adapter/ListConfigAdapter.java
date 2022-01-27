@@ -86,17 +86,18 @@ public class ListConfigAdapter extends BaseAdapter {
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
                         int itemAction = item.getItemId();
-                        if (itemAction == R.id.option_item_rename) {
-                            //do something
-                            Toast.makeText(activity,"Rename ",Toast.LENGTH_LONG).show();
-                            return true;
-                        }
-                        else if (itemAction == R.id.option_item_edit){
-                            //do something
-                            Toast.makeText(activity,"Edit",Toast.LENGTH_LONG).show();
-                            return true;
-                        }
-                        else if (itemAction == R.id.option_item_set_active) {
+//                        if (itemAction == R.id.option_item_rename) {
+//                            //do something
+//                            Toast.makeText(activity,"Rename ",Toast.LENGTH_LONG).show();
+//                            return true;
+//                        }
+//                        else if (itemAction == R.id.option_item_edit){
+//                            //do something
+//                            Toast.makeText(activity,"Edit",Toast.LENGTH_LONG).show();
+//                            return true;
+//                        }
+//                        else
+                            if (itemAction == R.id.option_item_set_active) {
                             android.app.AlertDialog.Builder alertSetActiveConfirm = new android.app.AlertDialog.Builder(activity);
                             alertSetActiveConfirm.setTitle("Activate Config");
                             alertSetActiveConfirm.setMessage("Are you sure to activate this config ?");

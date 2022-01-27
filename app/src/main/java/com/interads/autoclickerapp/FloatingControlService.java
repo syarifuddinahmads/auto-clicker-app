@@ -436,7 +436,7 @@ public class FloatingControlService extends Service {
     }
 
     // === DRAWING VIEW CLASS === //
-    public class DrawingView extends View {
+    public static class DrawingView extends View {
         private Paint mPaint;
         public int width;
         public  int height;
@@ -550,7 +550,7 @@ public class FloatingControlService extends Service {
                 case MotionEvent.ACTION_UP:
                     touch_up();
                     invalidate();
-                    drawSwipePosition((int) xStart,(int) yStart,(int) x,(int) y);
+//                    drawSwipePosition((int) xStart,(int) yStart,(int) x,(int) y);
                     break;
             }
             return true;

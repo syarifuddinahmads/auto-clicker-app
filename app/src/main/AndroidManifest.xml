@@ -15,7 +15,7 @@
         android:theme="@style/Theme.AutoClickerApp">
 
         <service
-            android:name=".ActionControlService"
+            android:name=".service.ActionControlService"
             android:enabled="true"
             android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
 
@@ -43,7 +43,7 @@
         </activity>
 
         <receiver
-            android:name=".BootUpReceiver"
+            android:name=".broadcast.BootUpReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
