@@ -98,21 +98,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                showAlertDialog();
-
-
-//                if (checkOverlayDisplayPermission()) {
-//
-//                    Intent intent = new Intent(MainActivity.this, ActionControlService.class);
-//                    intent.putExtra(ActionControlService.ACTION, ActionControlService.SHOW);
-//                    intent.putExtra("interval", 10);
-//
-//                    startService(intent);
-//                    moveTaskToBack(true);
-//                } else {
-//                    requestOverlayDisplayPermission();
-//                }
-
+                alertDialogCreateScenario();
 
             }
         });
@@ -127,35 +113,7 @@ public class MainActivity extends AppCompatActivity {
         getDataConfig();
     }
 
-    private void requestOverlayDisplayPermission() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true);
-        builder.setTitle("Screen Overlay Permission Needed");
-        builder.setMessage("Enable 'Display over other apps' from System Settings.");
-        builder.setPositiveButton("Open Settings", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, RESULT_OK);
-            }
-        });
-        alertDialog = builder.create();
-        alertDialog.show();
-    }
-
-    private boolean checkOverlayDisplayPermission() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    private void showAlertDialog() {
+    private void alertDialogCreateScenario() {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         DialogCreateScenario alertDialog = DialogCreateScenario.newInstance(appInstalleds);

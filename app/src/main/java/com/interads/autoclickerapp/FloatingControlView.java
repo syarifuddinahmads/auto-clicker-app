@@ -23,7 +23,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.model.Config;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 public class FloatingControlView extends FrameLayout implements View.OnClickListener {
 
@@ -33,6 +38,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private WindowManager _windowManager;
     private WindowManager.LayoutParams _layoutParam;
     private String currentState;
+    private ConfigDataHelper configDataHelper;
+    private Config lastConfig;
 
     private ImageView btn_action_play;
     private ImageView btn_action_pause;
@@ -48,6 +55,23 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
     public FloatingControlView(@NonNull Context context) {
         super(context);
+
+        configDataHelper = new ConfigDataHelper(getContext());
+        ArrayList<HashMap<String,String>> rows = configDataHelper.getAllData();
+        int lastRow = rows.size()-1;
+        String id = rows.get(lastRow).get("id");
+        String name = rows.get(lastRow).get("name");
+        String app = rows.get(lastRow).get("app");
+        String date = rows.get(lastRow).get("date");
+        String status = rows.get(lastRow).get("status");
+
+        lastConfig = new Config(Integer.parseInt(id),name,app,new Boolean(status),new Date(date));
+        Log.i(ACTIVITY_TAG,"ID = "+id);
+        Log.i(ACTIVITY_TAG,"Name = "+name);
+        Log.i(ACTIVITY_TAG,"App = "+app);
+        Log.i(ACTIVITY_TAG,"Date = "+date);
+        Log.i(ACTIVITY_TAG,"Status = "+status);
+
 
         _context = context.getApplicationContext();
         viewActionList = new ArrayList<View>();
