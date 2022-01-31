@@ -61,6 +61,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private ArrayList<View> viewActionList;
     private ArrayList<View> viewDrawerList;
     private ArrayList<View> viewFormList;
+    private ArrayList<Scenario> listScenario;
 
     public FloatingControlView(@NonNull Context context) {
         super(context);
@@ -81,6 +82,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         viewActionList = new ArrayList<View>();
         viewDrawerList = new ArrayList<View>();
         viewFormList = new ArrayList<View>();
+        listScenario = new ArrayList<Scenario>();
 
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         floatingControlView = fcvInflater.inflate(R.layout.floating_control_view,null);
@@ -202,6 +204,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                 return false;
             }
         });
+
+        listScenario.add(scenario);
 
         actionClickView.setOnClickListener(new OnClickListener() {
             @Override
@@ -333,6 +337,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         scenario.setXx(xEnd);
         scenario.setYy(yEnd);
 
+        listScenario.add(scenario);
 
         parentSwipeLayout.setOnClickListener(new OnClickListener() {
             @Override
@@ -374,6 +379,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             case R.id.action_play:
 
                 currentState = ActionControlService.PLAY;
+//                new ActionControlService(listScenario);
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLAY);
                 break;
             case R.id.action_pause:
@@ -617,5 +623,13 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             }
         });
 
+    }
+
+    public ArrayList<Scenario> getListScenario() {
+        return listScenario;
+    }
+
+    public void setListScenario(ArrayList<Scenario> listScenario) {
+        this.listScenario = listScenario;
     }
 }

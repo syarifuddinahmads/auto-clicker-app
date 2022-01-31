@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.interads.autoclickerapp.view.FloatingControlView;
 import com.interads.autoclickerapp.model.Scenario;
 
+import java.util.ArrayList;
+
 public class ActionControlService extends AccessibilityService {
     public static final String ACTIVITY_TAG = "Auto Control Service";
     public static final String ACTION = "action";
@@ -37,10 +39,13 @@ public class ActionControlService extends AccessibilityService {
     private Handler _handler;
     private IntervaRunnable _intervaRunnable;
 
+    private ArrayList<Scenario> listScenario;
+
     @Override
     public void onCreate() {
         super.onCreate();
         floatingControlView = new FloatingControlView(this);
+        listScenario = floatingControlView.getListScenario();
         HandlerThread handlerThread = new HandlerThread("auto-handler");
         handlerThread.start();
         _handler = new Handler(handlerThread.getLooper());
@@ -174,6 +179,20 @@ public class ActionControlService extends AccessibilityService {
 
         @Override
         public void run() {
+
+            Log.i(ACTIVITY_TAG,"List Scenario Size = "+listScenario.size());
+
+            for(int i = 0; i < listScenario.size();i++){
+                Log.i(ACTIVITY_TAG,"=======================");
+                Log.i(ACTIVITY_TAG,"TYPE ="+listScenario.get(i).getType());
+                Log.i(ACTIVITY_TAG,"X ="+listScenario.get(i).getX());
+                Log.i(ACTIVITY_TAG,"Y ="+listScenario.get(i).getY());
+                Log.i(ACTIVITY_TAG,"XX ="+listScenario.get(i).getXx());
+                Log.i(ACTIVITY_TAG,"YY ="+listScenario.get(i).getYy());
+                Log.i(ACTIVITY_TAG,"TIME ="+listScenario.get(i).getTime());
+                Log.i(ACTIVITY_TAG,"DURATION ="+listScenario.get(i).getDuration());
+                Log.i(ACTIVITY_TAG,"=======================");
+            }
 
         }
     }
