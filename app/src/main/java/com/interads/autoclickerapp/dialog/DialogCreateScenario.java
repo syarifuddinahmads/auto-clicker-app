@@ -30,7 +30,7 @@ import com.interads.autoclickerapp.model.Config;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class DialogCreateScenario extends DialogFragment implements AdapterView.OnItemSelectedListener {
+public class DialogCreateScenario extends DialogFragment{
     public static final String ACTIVITY_TAG = "Dialog Create Scenario";
     private EditText configName;
     private Spinner listApp;
@@ -39,7 +39,6 @@ public class DialogCreateScenario extends DialogFragment implements AdapterView.
     private ArrayList<AppInstalled> appInstalleds;
     private AlertDialog alertDialog;
     private ConfigDataHelper configDataHelper;
-    private String packageNameSelected = "";
 
     public DialogCreateScenario(ArrayList<AppInstalled> installedApps){
         appInstalleds = installedApps;
@@ -77,8 +76,6 @@ public class DialogCreateScenario extends DialogFragment implements AdapterView.
 
 
         listApp = (Spinner) view.findViewById(R.id.app_name);
-        listApp.setOnItemSelectedListener(this);
-
         ListAppInstalledAdapter appInstalledAdapter = new ListAppInstalledAdapter(getContext(),appInstalleds);
         listApp.setAdapter(appInstalledAdapter);
 
@@ -93,7 +90,7 @@ public class DialogCreateScenario extends DialogFragment implements AdapterView.
 
                     Config config = new Config();
                     config.setName(configName.getText().toString());
-                    config.setApp(packageNameSelected);
+                    config.setApp("");
                     config.setStatus(radioButton.getText().toString().toLowerCase().equals("in active") ? false:true);
                     config.setDate(new Date());
 
@@ -118,20 +115,6 @@ public class DialogCreateScenario extends DialogFragment implements AdapterView.
                 dismiss();
             }
         });
-
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        if(adapterView.getItemAtPosition(i) != null){
-            packageNameSelected = adapterView.getItemAtPosition(i).toString();
-            Toast.makeText(adapterView.getContext(), packageNameSelected, Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
 

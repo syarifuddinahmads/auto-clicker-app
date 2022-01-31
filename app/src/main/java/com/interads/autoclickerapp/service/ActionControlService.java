@@ -2,19 +2,15 @@ package com.interads.autoclickerapp.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
-import android.app.Activity;
-import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Path;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
-import com.interads.autoclickerapp.FloatingControlView;
+import com.interads.autoclickerapp.view.FloatingControlView;
 import com.interads.autoclickerapp.model.Scenario;
 
 public class ActionControlService extends AccessibilityService {

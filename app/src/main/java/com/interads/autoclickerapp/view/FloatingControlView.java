@@ -1,4 +1,4 @@
-package com.interads.autoclickerapp;
+package com.interads.autoclickerapp.view;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +25,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.interads.autoclickerapp.MainActivity;
+import com.interads.autoclickerapp.R;
 import com.interads.autoclickerapp.helper.ConfigDataHelper;
 import com.interads.autoclickerapp.model.Config;
 import com.interads.autoclickerapp.service.ActionControlService;
@@ -56,6 +58,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
     private ArrayList<View> viewActionList;
     private ArrayList<View> viewDrawerList;
+    private ArrayList<View> viewFormList;
 
     public FloatingControlView(@NonNull Context context) {
         super(context);
@@ -75,6 +78,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _context = context.getApplicationContext();
         viewActionList = new ArrayList<View>();
         viewDrawerList = new ArrayList<View>();
+        viewFormList = new ArrayList<View>();
 
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         floatingControlView = fcvInflater.inflate(R.layout.floating_control_view,null);
@@ -169,9 +173,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                Log.i(ACTIVITY_TAG,"X ========== "+event.getX());
-                Log.i(ACTIVITY_TAG,"Y ========== "+event.getY());
-
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         x = floatWindowLayoutUpdateParam.x;
@@ -195,8 +196,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         actionClickView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(), "Click click ninuninuninu.", Toast.LENGTH_LONG).show();
-
+                formClickScenario();
             }
         });
 
@@ -289,8 +289,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
 
         floatWindowLayoutParamEnd.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
-        floatWindowLayoutParamEnd.x = (int) xEnd;
-        floatWindowLayoutParamEnd.y = (int) yEnd;
+        floatWindowLayoutParamEnd.x = (int) xEnd + (int) xStart;
+        floatWindowLayoutParamEnd.y = (int) yEnd + (int) yStart;
 
         // === PARENT SWIPE POSITION === //
         int heightParent = (int) yEnd - (int) yStart;
@@ -315,6 +315,13 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
         _windowManager.addView(parentSwipeLayout,floatWindowParentLayoutParam);
         viewActionList.add(parentSwipeLayout);
+
+        parentSwipeLayout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                formSwipeScenario();
+            }
+        });
     }
 
     public void removeView(){
@@ -333,7 +340,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         }
         _windowManager.removeView(floatingControlView);
 
-        Intent main_intent = new Intent(getContext(),MainActivity.class);
+        Intent main_intent = new Intent(getContext(), MainActivity.class);
         main_intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         getContext().startActivity(main_intent);
 
@@ -496,5 +503,85 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             }
             return true;
         }
+    }
+
+    public void formClickScenario(){
+        LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View formClickView = fcvInflater.inflate(R.layout.form_click_scenario,null);
+
+        _layoutParam = new WindowManager.LayoutParams();
+        _layoutParam.gravity = Gravity.CENTER;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        _layoutParam.format = PixelFormat.RGBA_8888;
+        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        _layoutParam.width = LayoutParams.MATCH_PARENT;
+        _layoutParam.height = LayoutParams.MATCH_PARENT;
+        _windowManager.addView(formClickView, _layoutParam);
+        viewFormList.add(formClickView);
+
+        TextView btn_save_click_scenario = formClickView.findViewById(R.id.btn_save_click_scenario);
+        btn_save_click_scenario.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        TextView btn_cancel_click_scenario = formClickView.findViewById(R.id.btn_cancel_click_scenario);
+        btn_cancel_click_scenario.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                _windowManager.removeView(viewFormList.get(0));
+                viewFormList.remove(0);
+            }
+        });
+
+    }
+
+    public void formSwipeScenario(){
+        LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View formSwipeView = fcvInflater.inflate(R.layout.form_swipe_scenario,null);
+
+        _layoutParam = new WindowManager.LayoutParams();
+        _layoutParam.gravity = Gravity.CENTER;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        _layoutParam.format = PixelFormat.RGBA_8888;
+        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        _layoutParam.width = LayoutParams.MATCH_PARENT;
+        _layoutParam.height = LayoutParams.MATCH_PARENT;
+        _windowManager.addView(formSwipeView, _layoutParam);
+        viewFormList.add(formSwipeView);
+
+        TextView btn_save_swipe_scenario = formSwipeView.findViewById(R.id.btn_save_swipe_scenario);
+        btn_save_swipe_scenario.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        TextView btn_cance_swipe_scenario = formSwipeView.findViewById(R.id.btn_cancel_swipe_scenario);
+        btn_cance_swipe_scenario.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                _windowManager.removeView(viewFormList.get(0));
+                viewFormList.remove(0);
+            }
+        });
+
     }
 }
