@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -29,6 +30,7 @@ import com.interads.autoclickerapp.MainActivity;
 import com.interads.autoclickerapp.R;
 import com.interads.autoclickerapp.helper.ConfigDataHelper;
 import com.interads.autoclickerapp.model.Config;
+import com.interads.autoclickerapp.model.Scenario;
 import com.interads.autoclickerapp.service.ActionControlService;
 
 import java.util.ArrayList;
@@ -162,6 +164,11 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _layoutParam.height = LayoutParams.WRAP_CONTENT;
         _windowManager.addView(actionClickView, _layoutParam);
 
+        Scenario scenario = new Scenario();
+        scenario.setType("swipe");
+        scenario.setDuration(500);
+        scenario.setTime(50);
+
         actionClickView.setOnTouchListener(new View.OnTouchListener() {
 
             final WindowManager.LayoutParams floatWindowLayoutUpdateParam = _layoutParam;
@@ -189,6 +196,9 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                         break;
                 }
 
+                scenario.setX((float) x);
+                scenario.setY((float) y);
+
                 return false;
             }
         });
@@ -196,7 +206,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         actionClickView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                formClickScenario();
+                formClickScenario(scenario, String.valueOf(indexChildView));
             }
         });
 
@@ -237,8 +247,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     }
 
     private void drawSwipePosition(float xStart,float yStart,float xEnd,float yEnd){
-
-        Log.i(ACTIVITY_TAG,"======== After Draw ====== ");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -314,14 +322,26 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         floatWindowParentLayoutParam.y =(int) yStart;
 
         _windowManager.addView(parentSwipeLayout,floatWindowParentLayoutParam);
-        viewActionList.add(parentSwipeLayout);
+
+
+        Scenario scenario = new Scenario();
+        scenario.setType("swipe");
+        scenario.setDuration(500);
+        scenario.setTime(50);
+        scenario.setX(xStart);
+        scenario.setY(yStart);
+        scenario.setXx(xEnd);
+        scenario.setYy(yEnd);
+
 
         parentSwipeLayout.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                formSwipeScenario();
+                formSwipeScenario(scenario,String.valueOf(indexChildView));
             }
         });
+
+        viewActionList.add(parentSwipeLayout);
     }
 
     public void removeView(){
@@ -505,7 +525,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         }
     }
 
-    public void formClickScenario(){
+    public void formClickScenario(Scenario scenario, String numberAction){
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View formClickView = fcvInflater.inflate(R.layout.form_click_scenario,null);
 
@@ -526,10 +546,17 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _windowManager.addView(formClickView, _layoutParam);
         viewFormList.add(formClickView);
 
+        TextView title_form = formClickView.findViewById(R.id.title_form);
+        title_form.setText("Click Setting #"+numberAction);
+
         TextView btn_save_click_scenario = formClickView.findViewById(R.id.btn_save_click_scenario);
         btn_save_click_scenario.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                EditText delay_time = formClickView.findViewById(R.id.delay_time_scenario);
+                EditText touch_hold = formClickView.findViewById(R.id.touch_hold_scenario);
+
 
             }
         });
@@ -545,7 +572,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
     }
 
-    public void formSwipeScenario(){
+    public void formSwipeScenario(Scenario scenario, String numberAction){
         LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View formSwipeView = fcvInflater.inflate(R.layout.form_swipe_scenario,null);
 
@@ -566,10 +593,17 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _windowManager.addView(formSwipeView, _layoutParam);
         viewFormList.add(formSwipeView);
 
+        TextView title_form = formSwipeView.findViewById(R.id.title_form);
+        title_form.setText("Swipe Setting #"+numberAction);
+
         TextView btn_save_swipe_scenario = formSwipeView.findViewById(R.id.btn_save_swipe_scenario);
         btn_save_swipe_scenario.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                EditText delay_time = formSwipeView.findViewById(R.id.delay_time_scenario);
+                EditText duration = formSwipeView.findViewById(R.id.duration_scenario);
+
 
             }
         });
