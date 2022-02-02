@@ -128,25 +128,25 @@ public class ActionControlService extends AccessibilityService {
     }
 
     private void Tapping(Scenario scenario) {
+
+        float x = Float.parseFloat(String.valueOf(scenario.getX()).replace("-",""));
+        float y = Float.parseFloat(String.valueOf(scenario.getY()).replace("-",""));
+
         Path path = new Path();
-        path.moveTo(Float.parseFloat(String.valueOf(scenario.getX()).replace("-","")), Float.parseFloat(String.valueOf(scenario.getY()).replace("-","")));
+        path.moveTo(x,y);
+        path.lineTo(x,y);
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration());
-        builder.addStroke(clickstroke);
+        builder.addStroke(new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration()));
         GestureDescription gestureDescription = builder.build();
-        Log.e(ACTIVITY_TAG,"built.");
-        boolean isDispatch = this.dispatchGesture(gestureDescription, new AccessibilityService.GestureResultCallback(){
+        boolean isDispatch = dispatchGesture(gestureDescription, new GestureResultCallback() {
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
-                Log.e(ACTIVITY_TAG,"touch success.");
                 super.onCompleted(gestureDescription);
                 _handler.postDelayed(_intervaRunnable, _interval);
-                Log.e(ACTIVITY_TAG,"Just a test.");
             }
 
             @Override
             public void onCancelled(GestureDescription gestureDescription) {
-                Log.e(ACTIVITY_TAG,"Didn't touch anything.");
                 super.onCancelled(gestureDescription);
             }
         }, null);
@@ -156,18 +156,27 @@ public class ActionControlService extends AccessibilityService {
 
     private void Swipe(Scenario scenario){
 
-        GestureDescription.Builder builder = new GestureDescription.Builder();
+        float x = Float.parseFloat(String.valueOf(scenario.getX()).replace("-",""));
+        float y = Float.parseFloat(String.valueOf(scenario.getY()).replace("-",""));
+        float xx = Float.parseFloat(String.valueOf(scenario.getXx()).replace("-",""));
+        float yy = Float.parseFloat(String.valueOf(scenario.getYy()).replace("-",""));
+
         Path path = new Path();
-
-        path.moveTo(Float.parseFloat(String.valueOf(scenario.getX()).replace("-","")),Float.parseFloat(String.valueOf(scenario.getY()).replace("-","")));
-        path.lineTo(Float.parseFloat(String.valueOf(scenario.getXx()).replace("-","")),Float.parseFloat(String.valueOf(scenario.getYy()).replace("-","")));
-
-        builder.addStroke(new GestureDescription.StrokeDescription(path,scenario.getTime(),scenario.getDuration()));
-        boolean isDispatch = dispatchGesture(builder.build(), new GestureResultCallback() {
+        path.moveTo(x, y);
+        path.lineTo(xx, yy);
+        GestureDescription.Builder builder = new GestureDescription.Builder();
+        builder.addStroke(new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration()));
+        GestureDescription gestureDescription = builder.build();
+        boolean isDispatch =  dispatchGesture(gestureDescription, new GestureResultCallback() {
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
-                Log.i(ACTIVITY_TAG,"Gesture Completed");
                 super.onCompleted(gestureDescription);
+                _handler.postDelayed(_intervaRunnable, _interval);
+            }
+
+            @Override
+            public void onCancelled(GestureDescription gestureDescription) {
+                super.onCancelled(gestureDescription);
             }
         }, null);
 
