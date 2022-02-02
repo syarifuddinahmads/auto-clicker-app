@@ -1,6 +1,8 @@
 package com.interads.autoclickerapp.view;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -16,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -28,8 +31,9 @@ import androidx.annotation.NonNull;
 
 import com.interads.autoclickerapp.MainActivity;
 import com.interads.autoclickerapp.R;
-import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.helper.ScenarioDataHelper;
 import com.interads.autoclickerapp.model.Config;
+import com.interads.autoclickerapp.model.ConfigDetail;
 import com.interads.autoclickerapp.model.Scenario;
 import com.interads.autoclickerapp.service.ActionControlService;
 
@@ -45,7 +49,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private WindowManager _windowManager;
     private WindowManager.LayoutParams _layoutParam;
     private String currentState;
-    private ConfigDataHelper configDataHelper;
+    private ScenarioDataHelper scenarioDataHelper;
     private Config lastConfig;
 
     private ImageView btn_action_play;
@@ -66,8 +70,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     public FloatingControlView(@NonNull Context context) {
         super(context);
 
-        configDataHelper = new ConfigDataHelper(getContext());
-        ArrayList<HashMap<String,String>> rows = configDataHelper.getAllData();
+        scenarioDataHelper = new ScenarioDataHelper(getContext());
+        ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
         int lastRow = rows.size()-1;
         String id = rows.get(lastRow).get("id");
         String name = rows.get(lastRow).get("name");
@@ -76,7 +80,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         String status = rows.get(lastRow).get("status");
 
         lastConfig = new Config(Integer.parseInt(id),name,app,new Boolean(status),new Date(date));
-
 
         _context = context.getApplicationContext();
         viewActionList = new ArrayList<View>();
@@ -151,7 +154,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         number_action.setText(String.valueOf(indexChildView));
 
         _layoutParam = new WindowManager.LayoutParams();
-        _layoutParam.gravity = Gravity.CENTER;
+        _layoutParam.gravity = Gravity.TOP | Gravity.LEFT;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -167,7 +170,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _windowManager.addView(actionClickView, _layoutParam);
 
         Scenario scenario = new Scenario();
-        scenario.setType("swipe");
+        scenario.setType("click");
         scenario.setDuration(500);
         scenario.setTime(50);
 
@@ -188,6 +191,10 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                         y = floatWindowLayoutUpdateParam.y;
                         px = event.getRawX();
                         py = event.getRawY();
+
+                        scenario.setX((float) x);
+                        scenario.setY((float) y);
+
                         break;
                     case MotionEvent.ACTION_MOVE:
                         floatWindowLayoutUpdateParam.x = (int) ((x + event.getRawX()) - px);
@@ -195,11 +202,11 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
                         _windowManager.updateViewLayout(actionClickView, floatWindowLayoutUpdateParam);
 
+                        scenario.setX((float) floatWindowLayoutUpdateParam.x);
+                        scenario.setY((float) floatWindowLayoutUpdateParam.y);
+
                         break;
                 }
-
-                scenario.setX((float) x);
-                scenario.setY((float) y);
 
                 return false;
             }
@@ -355,6 +362,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             int totalIndexView = viewActionList.size()-1;
             _windowManager.removeView(viewActionList.get(totalIndexView));
             viewActionList.remove(totalIndexView);
+            listScenario.remove(totalIndexView);
             indexChildView--;
         }
     }
@@ -377,9 +385,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         Intent intent = new Intent(getContext(), ActionControlService.class);
         switch (view.getId()){
             case R.id.action_play:
-
                 currentState = ActionControlService.PLAY;
-//                new ActionControlService(listScenario);
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLAY);
                 break;
             case R.id.action_pause:
@@ -509,9 +515,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
             float x = event.getX();
             float y = event.getY();
 
-            Log.i(ACTIVITY_TAG,"X ========= "+x);
-            Log.i(ACTIVITY_TAG,"Y ========= "+y);
-
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     touch_start(x, y);
@@ -545,8 +548,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         }
 
         _layoutParam.format = PixelFormat.RGBA_8888;
-        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         _layoutParam.width = LayoutParams.MATCH_PARENT;
         _layoutParam.height = LayoutParams.MATCH_PARENT;
         _windowManager.addView(formClickView, _layoutParam);
@@ -555,15 +557,21 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         TextView title_form = formClickView.findViewById(R.id.title_form);
         title_form.setText("Click Setting #"+numberAction);
 
+        int i = Integer.parseInt(numberAction) - 1;
+        Scenario _scenario = listScenario.get(i);
+
+        EditText delay_time = formClickView.findViewById(R.id.delay_time_scenario);
+        EditText touch_hold = formClickView.findViewById(R.id.touch_hold_scenario);
+
+        delay_time.setText(String.valueOf(_scenario.getTime()));
+        touch_hold.setText(String.valueOf(_scenario.getDuration()));
+
         TextView btn_save_click_scenario = formClickView.findViewById(R.id.btn_save_click_scenario);
         btn_save_click_scenario.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                EditText delay_time = formClickView.findViewById(R.id.delay_time_scenario);
-                EditText touch_hold = formClickView.findViewById(R.id.touch_hold_scenario);
-
-
+                listScenario.get(i).setTime(Integer.parseInt(delay_time.getText().toString()));
+                listScenario.get(i).setDuration(Integer.parseInt(touch_hold.getText().toString()));
             }
         });
 
@@ -592,8 +600,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         }
 
         _layoutParam.format = PixelFormat.RGBA_8888;
-        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         _layoutParam.width = LayoutParams.MATCH_PARENT;
         _layoutParam.height = LayoutParams.MATCH_PARENT;
         _windowManager.addView(formSwipeView, _layoutParam);
@@ -602,15 +609,21 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         TextView title_form = formSwipeView.findViewById(R.id.title_form);
         title_form.setText("Swipe Setting #"+numberAction);
 
+        int i = Integer.parseInt(numberAction) - 1;
+        Scenario _scenario = listScenario.get(i);
+
+        EditText delay_time = formSwipeView.findViewById(R.id.delay_time_scenario);
+        EditText duration = formSwipeView.findViewById(R.id.duration_scenario);
+
+        delay_time.setText(String.valueOf(_scenario.getTime()));
+        duration.setText(String.valueOf(_scenario.getDuration()));
+
         TextView btn_save_swipe_scenario = formSwipeView.findViewById(R.id.btn_save_swipe_scenario);
         btn_save_swipe_scenario.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                EditText delay_time = formSwipeView.findViewById(R.id.delay_time_scenario);
-                EditText duration = formSwipeView.findViewById(R.id.duration_scenario);
-
-
+                listScenario.get(i).setTime(Integer.parseInt(delay_time.getText().toString()));
+                listScenario.get(i).setDuration(Integer.parseInt(duration.getText().toString()));
             }
         });
 
@@ -631,5 +644,18 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
     public void setListScenario(ArrayList<Scenario> listScenario) {
         this.listScenario = listScenario;
+    }
+
+    public void saveScenario(){
+        if(listScenario.size() > 0){
+            scenarioDataHelper.deleteConfigDetailByConfigId(lastConfig.getId());
+
+            for (int i = 0;i<listScenario.size();i++){
+                int type = listScenario.get(i).getType() == "swipe"?1:0;
+                scenarioDataHelper.insertConfigDetail(lastConfig.getId(),(i+1),type,listScenario.get(i).getX(),listScenario.get(i).getY(),listScenario.get(i).getXx(),listScenario.get(i).getYy(),listScenario.get(i).getTime(),listScenario.get(i).getDuration());
+            }
+        }else{
+            Toast.makeText(getContext(),"List Scenario is empty...",Toast.LENGTH_LONG).show();
+        }
     }
 }

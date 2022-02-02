@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,7 @@ import androidx.fragment.app.DialogFragment;
 import com.interads.autoclickerapp.service.ActionControlService;
 import com.interads.autoclickerapp.R;
 import com.interads.autoclickerapp.adapter.ListAppInstalledAdapter;
-import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.helper.ScenarioDataHelper;
 import com.interads.autoclickerapp.model.AppInstalled;
 import com.interads.autoclickerapp.model.Config;
 
@@ -38,7 +39,8 @@ public class DialogCreateScenario extends DialogFragment{
     private TextView btnCancel,btnSave;
     private ArrayList<AppInstalled> appInstalleds;
     private AlertDialog alertDialog;
-    private ConfigDataHelper configDataHelper;
+    private ScenarioDataHelper scenarioDataHelper;
+    String app_name_selected = "";
 
     public DialogCreateScenario(ArrayList<AppInstalled> installedApps){
         appInstalleds = installedApps;
@@ -58,7 +60,7 @@ public class DialogCreateScenario extends DialogFragment{
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        configDataHelper = new ConfigDataHelper(getContext());
+        scenarioDataHelper = new ScenarioDataHelper(getContext());
 
         btnCancel = view.findViewById(R.id.btn_cancel_save_config);
         btnSave = view.findViewById(R.id.btn_save_config);
@@ -79,6 +81,19 @@ public class DialogCreateScenario extends DialogFragment{
         ListAppInstalledAdapter appInstalledAdapter = new ListAppInstalledAdapter(getContext(),appInstalleds);
         listApp.setAdapter(appInstalledAdapter);
 
+        listApp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                app_name_selected = appInstalleds.get(i).getPackageName();
+                Log.i(ACTIVITY_TAG,"App Name = "+app_name_selected);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,11 +105,11 @@ public class DialogCreateScenario extends DialogFragment{
 
                     Config config = new Config();
                     config.setName(configName.getText().toString());
-                    config.setApp("");
+                    config.setApp(app_name_selected);
                     config.setStatus(radioButton.getText().toString().toLowerCase().equals("in active") ? false:true);
                     config.setDate(new Date());
 
-                    configDataHelper.insert(config.getName(),config.getApp(),config.getDate(),config.getStatus());
+                    scenarioDataHelper.insertConfig(config.getName(),config.getApp(),config.getDate(),config.getStatus());
 
 
                     Intent intent = new Intent(getActivity(), ActionControlService.class);

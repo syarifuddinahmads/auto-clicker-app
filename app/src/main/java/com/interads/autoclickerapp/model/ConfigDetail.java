@@ -13,6 +13,10 @@ public class ConfigDetail {
     public int duration;
     public int time;
 
+    public ConfigDetail(){
+
+    }
+
     public ConfigDetail(Config config, int idConfig, String x, String y,String xX, String yY, String type, int orderConfig, int duration, int time) {
         this.config = config;
         this.idConfig = idConfig;

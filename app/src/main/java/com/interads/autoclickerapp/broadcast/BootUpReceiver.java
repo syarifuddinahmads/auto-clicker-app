@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.interads.autoclickerapp.MainActivity;
-import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.helper.ScenarioDataHelper;
 import com.interads.autoclickerapp.model.Config;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 public class BootUpReceiver extends BroadcastReceiver {
     private static String ACTIVITY_TAG = "Boot Up Receiver";
-    ConfigDataHelper configDataHelper = new ConfigDataHelper(null);
+    ScenarioDataHelper scenarioDataHelper = new ScenarioDataHelper(null);
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -23,7 +23,7 @@ public class BootUpReceiver extends BroadcastReceiver {
         String packageNameApp = "com.idntimes.idntimes";
         Boolean statusConfigApp = true;
 
-        ArrayList<HashMap<String,String>> rows = configDataHelper.getAllData();
+        ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
         for(int i = 0; i < rows.size();i++){
             if(rows.get(i).get("status").equals("1")){
                 packageNameApp = rows.get(i).get("");

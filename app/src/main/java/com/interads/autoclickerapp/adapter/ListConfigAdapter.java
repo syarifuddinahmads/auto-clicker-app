@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.interads.autoclickerapp.MainActivity;
 import com.interads.autoclickerapp.R;
-import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.helper.ScenarioDataHelper;
 import com.interads.autoclickerapp.model.Config;
 
 import org.w3c.dom.Text;
@@ -29,11 +29,11 @@ public class ListConfigAdapter extends BaseAdapter {
     private Activity activity;
     private LayoutInflater layoutInflater;
     private List<Config> configList;
-    private ConfigDataHelper configDataHelper;
+    private ScenarioDataHelper scenarioDataHelper;
     public ListConfigAdapter(Activity activity, List<Config> list) {
         this.activity = activity;
         this.configList = list;
-        this.configDataHelper = new ConfigDataHelper(activity.getApplicationContext());
+        this.scenarioDataHelper = new ScenarioDataHelper(activity.getApplicationContext());
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ListConfigAdapter extends BaseAdapter {
                             alertSetActiveConfirm.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    configDataHelper.activate_config(config.getId(),true);
+                                    scenarioDataHelper.activateConfig(config.getId(),true);
                                     Toast.makeText(activity,"Config activated... ",Toast.LENGTH_LONG).show();
                                 }
                             });
@@ -127,7 +127,7 @@ public class ListConfigAdapter extends BaseAdapter {
                             alertDeleteConfirm.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    configDataHelper.delete(config.getId());
+                                    scenarioDataHelper.deleteConfig(config.getId());
                                     Toast.makeText(activity,"Delete data config successfully... ",Toast.LENGTH_LONG).show();
                                 }
                             });

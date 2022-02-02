@@ -56,15 +56,13 @@ public class ActionControlService extends AccessibilityService {
 
         if(intent != null){
 
-            Log.i(ACTIVITY_TAG,"=========== ACTION RUNNING ===========");
-
             String action = intent.getStringExtra(ACTION);
 
             if(SHOW.equals(action)){
 
                 Log.i(ACTIVITY_TAG,"SHOW");
 
-                _interval = intent.getIntExtra("interval",10)*1000;
+                _interval = intent.getIntExtra("interval",10);
                 _mode = intent.getStringExtra(MODE);
                 floatingControlView.showFloatingControlView();
             }else if(HIDE.equals(action)){
@@ -114,6 +112,7 @@ public class ActionControlService extends AccessibilityService {
             }else if(SAVE.equals(action)){
 
                 Log.i(ACTIVITY_TAG,"Save");
+                floatingControlView.saveScenario();
                 _handler.removeCallbacksAndMessages(null);
             }else if(EDIT.equals(action)){
 
@@ -130,7 +129,7 @@ public class ActionControlService extends AccessibilityService {
 
     private void Tapping(Scenario scenario) {
         Path path = new Path();
-        path.moveTo(scenario.getX(), scenario.getY());
+        path.moveTo(Float.parseFloat(String.valueOf(scenario.getX()).replace("-","")), Float.parseFloat(String.valueOf(scenario.getY()).replace("-","")));
         GestureDescription.Builder builder = new GestureDescription.Builder();
         GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration());
         builder.addStroke(clickstroke);
@@ -160,8 +159,8 @@ public class ActionControlService extends AccessibilityService {
         GestureDescription.Builder builder = new GestureDescription.Builder();
         Path path = new Path();
 
-        path.moveTo(scenario.getX(),scenario.getY());
-        path.lineTo(scenario.getXx(),scenario.getYy());
+        path.moveTo(Float.parseFloat(String.valueOf(scenario.getX()).replace("-","")),Float.parseFloat(String.valueOf(scenario.getY()).replace("-","")));
+        path.lineTo(Float.parseFloat(String.valueOf(scenario.getXx()).replace("-","")),Float.parseFloat(String.valueOf(scenario.getYy()).replace("-","")));
 
         builder.addStroke(new GestureDescription.StrokeDescription(path,scenario.getTime(),scenario.getDuration()));
         boolean isDispatch = dispatchGesture(builder.build(), new GestureResultCallback() {
@@ -192,6 +191,11 @@ public class ActionControlService extends AccessibilityService {
                 Log.i(ACTIVITY_TAG,"TIME ="+listScenario.get(i).getTime());
                 Log.i(ACTIVITY_TAG,"DURATION ="+listScenario.get(i).getDuration());
                 Log.i(ACTIVITY_TAG,"=======================");
+                if(listScenario.get(i).getType().equals("swipe")){
+                    Swipe(listScenario.get(i));
+                }else{
+                    Tapping(listScenario.get(i));
+                }
             }
 
         }

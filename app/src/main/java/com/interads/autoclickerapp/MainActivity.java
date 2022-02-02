@@ -24,7 +24,7 @@ import android.widget.ListView;
 
 import com.interads.autoclickerapp.adapter.ListConfigAdapter;
 import com.interads.autoclickerapp.dialog.DialogCreateScenario;
-import com.interads.autoclickerapp.helper.ConfigDataHelper;
+import com.interads.autoclickerapp.helper.ScenarioDataHelper;
 import com.interads.autoclickerapp.model.AppInstalled;
 import com.interads.autoclickerapp.model.Config;
 
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listViewConfig;
     List<Config> configList = new ArrayList<Config>();
     ListConfigAdapter configListAdapter;
-    ConfigDataHelper configDataHelper = new ConfigDataHelper(this);
+    ScenarioDataHelper scenarioDataHelper;
     PackageManager packageManager;
     List<PackageInfo> listPackageInfo;
     ArrayList<AppInstalled> appInstalleds;
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // set adapter list view and get data from sqlite
-        configDataHelper = new ConfigDataHelper(getApplicationContext());
+        scenarioDataHelper = new ScenarioDataHelper(getApplicationContext());
         listViewConfig = findViewById(R.id.list_view_config);
         configListAdapter = new ListConfigAdapter(MainActivity.this,configList);
         listViewConfig.setAdapter(configListAdapter);
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getDataConfig(){
-        ArrayList<HashMap<String,String>> rows = configDataHelper.getAllData();
+        ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
         for(int i = 0; i < rows.size();i++){
             String id = rows.get(i).get("id");
             String name = rows.get(i).get("name");
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         config.setDate(new Date());
         config.setStatus(false);
 
-        configDataHelper.insert(config.getName(),config.getApp(),config.getDate(),config.getStatus());
+        scenarioDataHelper.insertConfig(config.getName(),config.getApp(),config.getDate(),config.getStatus());
     }
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
