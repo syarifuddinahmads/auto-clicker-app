@@ -120,16 +120,16 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
 
 
+        // clear all views
+        viewActionList.clear();
+        viewDrawerList.clear();
+        viewFormList.clear();
+        listScenario.clear();
+
         scenarioDataHelper = new ScenarioDataHelper(getContext());
 
         if(idConfig != 0){
             Log.i(ACTIVITY_TAG,"OPEN CONFIG SHOW FLOATING = "+idConfig);
-
-            // clear all views
-            viewActionList.clear();
-            viewDrawerList.clear();
-            viewFormList.clear();
-            listScenario.clear();
 
             ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
             ArrayList<HashMap<String,String>> rowDetails = scenarioDataHelper.getAllDataConfigDetail();
