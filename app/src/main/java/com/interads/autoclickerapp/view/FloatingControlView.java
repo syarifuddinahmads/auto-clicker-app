@@ -71,6 +71,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         super(context);
 
         scenarioDataHelper = new ScenarioDataHelper(getContext());
+
+        Log.i(ACTIVITY_TAG,"NEW CONFIG CONSTRUCT");
         ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
         int lastRow = rows.size()-1;
         String id = rows.get(lastRow).get("id");
@@ -114,7 +116,103 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _windowManager = (WindowManager) _context.getSystemService(Context.WINDOW_SERVICE);
     }
 
-    public void showFloatingControlView(){
+    public void showFloatingControlView(int idConfig){
+
+
+
+        scenarioDataHelper = new ScenarioDataHelper(getContext());
+
+        if(idConfig != 0){
+            Log.i(ACTIVITY_TAG,"OPEN CONFIG SHOW FLOATING = "+idConfig);
+
+            // clear all views
+            viewActionList.clear();
+            viewDrawerList.clear();
+            viewFormList.clear();
+            listScenario.clear();
+
+            ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
+            ArrayList<HashMap<String,String>> rowDetails = scenarioDataHelper.getAllDataConfigDetail();
+
+            String id;
+            String name;
+            String app;
+            String date;
+            String status;
+
+            int counter = 0;
+            while (counter < rows.size()){
+                Log.i(ACTIVITY_TAG,"ID -->"+rows.get(counter).get("id")+" | "+(Integer.parseInt(rows.get(counter).get("id")) == idConfig));
+                if(Integer.parseInt(rows.get(counter).get("id")) == idConfig){
+                    id = rows.get(counter).get("id");
+                    name = rows.get(counter).get("name");
+                    app = rows.get(counter).get("app");
+                    date = rows.get(counter).get("date");
+                    status = rows.get(counter).get("status");
+                    lastConfig = new Config(Integer.parseInt(id),name,app,new Boolean(status),new Date(date));
+
+                    Log.i(ACTIVITY_TAG,"ID = "+id);
+                    Log.i(ACTIVITY_TAG,"NAME = "+name);
+                    Log.i(ACTIVITY_TAG,"APP = "+app);
+                    Log.i(ACTIVITY_TAG,"DATE = "+date);
+                    Log.i(ACTIVITY_TAG,"STATUS = "+status);
+
+                    for(int i = 0; i<rowDetails.size();i++){
+                        if(Integer.parseInt(rowDetails.get(i).get("id_config")) == idConfig){
+
+                            ConfigDetail configDetail = new ConfigDetail();
+                            configDetail.setIdConfig(Integer.parseInt(rowDetails.get(i).get("id_config")));
+                            configDetail.setOrderConfig(Integer.parseInt(rowDetails.get(i).get("order_config")));
+                            configDetail.setTime(Integer.parseInt(rowDetails.get(i).get("time")));
+                            configDetail.setDuration(Integer.parseInt(rowDetails.get(i).get("duration")));
+                            configDetail.setType(rowDetails.get(i).get("duration").equals(1) ? "swipe":"click");
+                            configDetail.setX(rowDetails.get(i).get("x"));
+                            configDetail.setY(rowDetails.get(i).get("y"));
+                            configDetail.setxX(rowDetails.get(i).get("xx"));
+                            configDetail.setyY(rowDetails.get(i).get("yy"));
+
+                            if(Integer.parseInt(rowDetails.get(i).get("type")) == 1){
+                                Log.i(ACTIVITY_TAG,"SWIPE");
+                                bindActionSwipe(configDetail);
+                            }else{
+                                Log.i(ACTIVITY_TAG,"CLICK");
+                                bindActionClick(configDetail);
+                            }
+                        }
+                    }
+
+                    counter = rows.size()+1;
+                }
+
+                counter++;
+            }
+
+
+        }else{
+            Log.i(ACTIVITY_TAG,"NEW CONFIG SHOW FLOATING");
+
+            ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
+            String id;
+            String name;
+            String app;
+            String date;
+            String status;
+
+            int lastRow = rows.size()-1;
+            id = rows.get(lastRow).get("id");
+            name = rows.get(lastRow).get("name");
+            app = rows.get(lastRow).get("app");
+            date = rows.get(lastRow).get("date");
+            status = rows.get(lastRow).get("status");
+            lastConfig = new Config(Integer.parseInt(id),name,app,new Boolean(status),new Date(date));
+
+            Log.i(ACTIVITY_TAG,"ID = "+id);
+            Log.i(ACTIVITY_TAG,"NAME = "+name);
+            Log.i(ACTIVITY_TAG,"APP = "+app);
+            Log.i(ACTIVITY_TAG,"DATE = "+date);
+            Log.i(ACTIVITY_TAG,"STATUS = "+status);
+        }
+
 
         DisplayMetrics metrics = _context.getResources().getDisplayMetrics();
         int width = metrics.widthPixels;
@@ -386,6 +484,10 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         switch (view.getId()){
             case R.id.action_play:
                 currentState = ActionControlService.PLAY;
+                int[] location = new int[2];
+                floatingControlView.getLocationOnScreen(location);
+                intent.putExtra("x", location[0] - 1);
+                intent.putExtra("y", location[1] - 1);
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLAY);
                 break;
             case R.id.action_pause:
@@ -657,5 +759,196 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         }else{
             Toast.makeText(getContext(),"List Scenario is empty...",Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void bindActionClick(ConfigDetail configDetail){
+
+        int xStart = (int) Float.parseFloat(configDetail.getX());
+        int yStart= (int) Float.parseFloat(configDetail.getY());
+
+        int indexChildView = viewActionList.size()+1;
+
+        LayoutInflater fcvInflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View actionClickView = fcvInflater.inflate(R.layout.click_view,null);
+        actionClickView.setId(indexChildView);
+        TextView number_action = actionClickView.findViewById(R.id.number_action_click);
+        number_action.setText(String.valueOf(indexChildView));
+
+        _layoutParam = new WindowManager.LayoutParams();
+        _layoutParam.gravity = Gravity.TOP | Gravity.LEFT;
+        _layoutParam.x = xStart;
+        _layoutParam.y = yStart;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        _layoutParam.format = PixelFormat.RGBA_8888;
+        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        _layoutParam.width = LayoutParams.WRAP_CONTENT;
+        _layoutParam.height = LayoutParams.WRAP_CONTENT;
+        _windowManager.addView(actionClickView, _layoutParam);
+
+        Scenario scenario = new Scenario();
+        scenario.setType("click");
+        scenario.setDuration(configDetail.getDuration());
+        scenario.setTime(configDetail.getTime());
+
+        actionClickView.setOnTouchListener(new View.OnTouchListener() {
+
+            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = _layoutParam;
+            double x;
+            double y;
+            double px;
+            double py;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        x = floatWindowLayoutUpdateParam.x;
+                        y = floatWindowLayoutUpdateParam.y;
+                        px = event.getRawX();
+                        py = event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        floatWindowLayoutUpdateParam.x = (int) ((x + event.getRawX()) - px);
+                        floatWindowLayoutUpdateParam.y = (int) ((y + event.getRawY()) - py);
+
+                        _windowManager.updateViewLayout(actionClickView, floatWindowLayoutUpdateParam);
+
+                        scenario.setX((float) floatWindowLayoutUpdateParam.x);
+                        scenario.setY((float) floatWindowLayoutUpdateParam.y);
+
+                        break;
+                }
+
+                return false;
+            }
+        });
+
+
+        scenario.setX(xStart);
+        scenario.setY(yStart);
+
+        listScenario.add(scenario);
+
+        actionClickView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                formClickScenario(scenario, String.valueOf(indexChildView));
+            }
+        });
+
+        viewActionList.add(actionClickView);
+    }
+
+    public void bindActionSwipe(ConfigDetail configDetail){
+
+        int xStart = (int) Float.parseFloat(configDetail.getX());
+        int yStart= (int) Float.parseFloat(configDetail.getY());
+        int xEnd= (int) Float.parseFloat(configDetail.getxX());
+        int yEnd= (int) Float.parseFloat(configDetail.getyY());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }
+
+        if(viewDrawerList.size() > 0){
+            _windowManager.removeView(viewDrawerList.get(0));
+            viewDrawerList.remove(0);
+        }
+
+        int indexChildView = viewActionList.size()+1;
+
+        RelativeLayout parentSwipeLayout;
+        parentSwipeLayout = new RelativeLayout(getContext());
+
+        LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup floatSwipeStartView = (ViewGroup) inflater.inflate(R.layout.start_swipe_view, null);
+        floatSwipeStartView.setId(indexChildView);
+        TextView number_action_start = floatSwipeStartView.findViewById(R.id.start_action_swipe);
+        number_action_start.setText(String.valueOf(indexChildView));
+
+        WindowManager.LayoutParams floatWindowLayoutParamStart = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                _layoutParam.type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        floatWindowLayoutParamStart.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
+        floatWindowLayoutParamStart.x = (int) xStart;
+        floatWindowLayoutParamStart.y = (int) yStart;
+
+
+        ViewGroup floatSwipeEndView = (ViewGroup) inflater.inflate(R.layout.end_swipe_view, null);
+        floatSwipeEndView.setId(indexChildView);
+        TextView number_action_end = floatSwipeEndView.findViewById(R.id.end_action_swipe);
+        number_action_end.setText(String.valueOf(indexChildView));
+        WindowManager.LayoutParams floatWindowLayoutParamEnd = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                _layoutParam.type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+
+        floatWindowLayoutParamEnd.gravity = Gravity.TOP | Gravity.LEFT; // RESET X,Y AXIS WINDOW
+        floatWindowLayoutParamEnd.x = (int) xEnd + (int) xStart;
+        floatWindowLayoutParamEnd.y = (int) yEnd + (int) yStart;
+
+        // === PARENT SWIPE POSITION === //
+        int heightParent = (int) yEnd - (int) yStart;
+        int widthParent = (int) xEnd -(int) xStart;
+        parentSwipeLayout.setMinimumHeight(heightParent);
+        parentSwipeLayout.setMinimumWidth(widthParent);
+        parentSwipeLayout.setBackgroundColor(Color.parseColor("#59673AB7"));
+        parentSwipeLayout.addView(floatSwipeStartView,floatWindowLayoutParamStart);
+        parentSwipeLayout.addView(floatSwipeEndView,floatWindowLayoutParamEnd);
+
+        WindowManager.LayoutParams floatWindowParentLayoutParam = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                _layoutParam.type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        floatWindowParentLayoutParam.gravity = Gravity.TOP | Gravity.LEFT;
+        floatWindowParentLayoutParam.x = (int) xStart;
+        floatWindowParentLayoutParam.y =(int) yStart;
+
+        _windowManager.addView(parentSwipeLayout,floatWindowParentLayoutParam);
+
+
+        Scenario scenario = new Scenario();
+        scenario.setType("swipe");
+        scenario.setDuration(configDetail.getDuration());
+        scenario.setTime(configDetail.getTime());
+        scenario.setX(xStart);
+        scenario.setY(yStart);
+        scenario.setXx(xEnd);
+        scenario.setYy(yEnd);
+
+        listScenario.add(scenario);
+
+        parentSwipeLayout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                formSwipeScenario(scenario,String.valueOf(indexChildView));
+            }
+        });
+
+        viewActionList.add(parentSwipeLayout);
+
     }
 }

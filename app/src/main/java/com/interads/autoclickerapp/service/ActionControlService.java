@@ -34,7 +34,7 @@ public class ActionControlService extends AccessibilityService {
     public static final String SAVE = "save";
     public String _mode;
     private FloatingControlView floatingControlView;
-    private int _interval;
+    private int _interval,id_config =0;
 
     private Handler _handler;
     private IntervaRunnable _intervaRunnable;
@@ -44,6 +44,7 @@ public class ActionControlService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
+
         floatingControlView = new FloatingControlView(this);
         listScenario = floatingControlView.getListScenario();
         HandlerThread handlerThread = new HandlerThread("auto-handler");
@@ -62,9 +63,10 @@ public class ActionControlService extends AccessibilityService {
 
                 Log.i(ACTIVITY_TAG,"SHOW");
 
+                id_config = intent.getIntExtra("id_config",0);
                 _interval = intent.getIntExtra("interval",10);
                 _mode = intent.getStringExtra(MODE);
-                floatingControlView.showFloatingControlView();
+                floatingControlView.showFloatingControlView(id_config);
             }else if(HIDE.equals(action)){
 
                 Log.i(ACTIVITY_TAG,"HIDE");
@@ -142,7 +144,7 @@ public class ActionControlService extends AccessibilityService {
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
                 super.onCompleted(gestureDescription);
-                _handler.postDelayed(_intervaRunnable, _interval);
+                _handler.postDelayed(_intervaRunnable,_interval);
             }
 
             @Override

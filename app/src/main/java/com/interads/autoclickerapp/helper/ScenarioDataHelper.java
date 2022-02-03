@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.interads.autoclickerapp.model.Config;
+import com.interads.autoclickerapp.model.Scenario;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
