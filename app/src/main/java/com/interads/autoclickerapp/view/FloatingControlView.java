@@ -796,6 +796,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         scenario.setType("click");
         scenario.setDuration(configDetail.getDuration());
         scenario.setTime(configDetail.getTime());
+        scenario.setX(xStart);
+        scenario.setY(yStart);
 
         actionClickView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -814,6 +816,10 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                         y = floatWindowLayoutUpdateParam.y;
                         px = event.getRawX();
                         py = event.getRawY();
+
+                        scenario.setX((float) floatWindowLayoutUpdateParam.x);
+                        scenario.setY((float) floatWindowLayoutUpdateParam.y);
+
                         break;
                     case MotionEvent.ACTION_MOVE:
                         floatWindowLayoutUpdateParam.x = (int) ((x + event.getRawX()) - px);
@@ -830,10 +836,6 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                 return false;
             }
         });
-
-
-        scenario.setX(xStart);
-        scenario.setY(yStart);
 
         listScenario.add(scenario);
 
