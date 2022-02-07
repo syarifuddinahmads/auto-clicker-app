@@ -12,7 +12,6 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:screenOrientation="portrait"
         android:theme="@style/Theme.AutoClickerApp">
 
         <activity
@@ -33,9 +32,9 @@
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
-<!--            <meta-data-->
-<!--                android:name="android.accessibilityservice"-->
-<!--                android:resource="@xml/accessibility" />-->
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility" />
         </service>
 
         <receiver

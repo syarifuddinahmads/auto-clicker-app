@@ -46,7 +46,7 @@ public class ActionControlService extends AccessibilityService {
     public void onCreate() {
         super.onCreate();
 
-        floatingControlView = new FloatingControlView(this);
+        floatingControlView = new FloatingControlView(ActionControlService.this);
         listScenario = floatingControlView.getListScenario();
         HandlerThread handlerThread = new HandlerThread("auto-handler");
         handlerThread.start();
@@ -143,7 +143,7 @@ public class ActionControlService extends AccessibilityService {
         builder.addStroke(clickstroke);
         GestureDescription gestureDescription = builder.build();
         Log.e(ACTIVITY_TAG,"built.");
-        boolean isDispatch = this.dispatchGesture(gestureDescription, new AccessibilityService.GestureResultCallback(){
+        boolean isDispatch = dispatchGesture(gestureDescription, new AccessibilityService.GestureResultCallback(){
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
                 Log.e(ACTIVITY_TAG,"touch success.");
@@ -157,6 +157,7 @@ public class ActionControlService extends AccessibilityService {
                 Log.e(ACTIVITY_TAG,"Didn't touch anything.");
                 super.onCancelled(gestureDescription);
             }
+
         }, null);
 
         Log.e(ACTIVITY_TAG,"The result is " + isDispatch);
@@ -227,4 +228,5 @@ public class ActionControlService extends AccessibilityService {
     public void onInterrupt() {
 
     }
+
 }
