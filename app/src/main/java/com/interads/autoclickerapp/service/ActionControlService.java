@@ -14,6 +14,7 @@ import com.interads.autoclickerapp.view.FloatingControlView;
 import com.interads.autoclickerapp.model.Scenario;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class ActionControlService extends AccessibilityService {
     public static final String ACTIVITY_TAG = "Auto Control Service";
@@ -34,10 +35,10 @@ public class ActionControlService extends AccessibilityService {
     public static final String SAVE = "save";
     public String _mode;
     private FloatingControlView floatingControlView;
-    private int _interval,id_config =0;
-
+    private int _interval;
+    private int id_config =0;
+    private IntervalRunnable _intervalRunnable;
     private Handler _handler;
-    private IntervaRunnable _intervaRunnable;
 
     private ArrayList<Scenario> listScenario;
 
@@ -64,7 +65,7 @@ public class ActionControlService extends AccessibilityService {
                 Log.i(ACTIVITY_TAG,"SHOW");
 
                 id_config = intent.getIntExtra("id_config",0);
-                _interval = intent.getIntExtra("interval",10);
+                _interval = intent.getIntExtra("interval",10)* 1000;
                 _mode = intent.getStringExtra(MODE);
                 floatingControlView.showFloatingControlView(id_config);
             }else if(HIDE.equals(action)){
@@ -84,11 +85,10 @@ public class ActionControlService extends AccessibilityService {
             } else if(PLAY.equals(action)){
 
                 Log.i(ACTIVITY_TAG,"PLAY");
-
-                if (_intervaRunnable == null){
-                    _intervaRunnable = new IntervaRunnable();
+                if (_intervalRunnable == null){
+                    _intervalRunnable = new IntervalRunnable();
                 }
-                _handler.postDelayed(_intervaRunnable,_interval);
+                _handler.postDelayed(_intervalRunnable,_interval);
 
             }else if(STOP.equals(action)){
 
@@ -134,21 +134,27 @@ public class ActionControlService extends AccessibilityService {
         float x = Float.parseFloat(String.valueOf(scenario.getX()).replace("-",""));
         float y = Float.parseFloat(String.valueOf(scenario.getY()).replace("-",""));
 
+
         Path path = new Path();
-        path.moveTo(x,y);
-        path.lineTo(x,y);
+        path.moveTo(x, y);
+        path.lineTo(x, y);
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration()));
+        GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration());
+        builder.addStroke(clickstroke);
         GestureDescription gestureDescription = builder.build();
-        boolean isDispatch = dispatchGesture(gestureDescription, new GestureResultCallback() {
+        Log.e(ACTIVITY_TAG,"built.");
+        boolean isDispatch = this.dispatchGesture(gestureDescription, new AccessibilityService.GestureResultCallback(){
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
+                Log.e(ACTIVITY_TAG,"touch success.");
                 super.onCompleted(gestureDescription);
-                _handler.postDelayed(_intervaRunnable,_interval);
+                _handler.postDelayed(_intervalRunnable, _interval);
+                Log.e(ACTIVITY_TAG,"Just a test.");
             }
 
             @Override
             public void onCancelled(GestureDescription gestureDescription) {
+                Log.e(ACTIVITY_TAG,"Didn't touch anything.");
                 super.onCancelled(gestureDescription);
             }
         }, null);
@@ -173,7 +179,7 @@ public class ActionControlService extends AccessibilityService {
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
                 super.onCompleted(gestureDescription);
-                _handler.postDelayed(_intervaRunnable, _interval);
+                _handler.postDelayed(_intervalRunnable, _interval);
             }
 
             @Override
@@ -185,7 +191,7 @@ public class ActionControlService extends AccessibilityService {
         Log.e(ACTIVITY_TAG,"Result Swipe " + isDispatch);
     }
 
-    private  class IntervaRunnable implements Runnable{
+    private  class IntervalRunnable implements Runnable{
 
         @Override
         public void run() {

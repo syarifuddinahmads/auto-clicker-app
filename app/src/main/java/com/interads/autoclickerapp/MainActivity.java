@@ -39,7 +39,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String MAIN_ACTIVITY = "Main Activity";
+    private static String ACTIVITY_TAG = "Main Activity";
     private AlertDialog alertDialog;
     private ListView listViewConfig;
     List<Config> configList = new ArrayList<Config>();
@@ -178,8 +178,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
+            Log.i(ACTIVITY_TAG,"Receive Boot Up");
+
             String broadcastType = intent.getStringExtra("broadcast_type");
             String packageNameApp = intent.getStringExtra("package_name_app");
+            String idConfigApp = intent.getStringExtra("id_config_app");
 
             switch (broadcastType){
                 case "BOOT_UP":
@@ -189,6 +192,19 @@ public class MainActivity extends AppCompatActivity {
 
             if(isForeground(context,packageNameApp)){
                 // run config scenario
+                if (checkOverlayDisplayPermission()) {
+
+                    intent = new Intent(MainActivity.this, ActionControlService.class);
+                    intent.putExtra(ActionControlService.ACTION, ActionControlService.SHOW);
+                    intent.putExtra("interval", 10);
+                    intent.putExtra("id_config",idConfigApp);
+                    intent.putExtra(ActionControlService.MODE, ActionControlService.TAP);
+
+                    startService(intent);
+                    moveTaskToBack(true);
+                } else {
+                    requestOverlayDisplayPermission();
+                }
             }
 
         }

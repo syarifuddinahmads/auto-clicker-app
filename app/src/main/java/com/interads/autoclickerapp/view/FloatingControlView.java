@@ -48,7 +48,9 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private View floatingControlView;
     private WindowManager _windowManager;
     private WindowManager.LayoutParams _layoutParam;
+    private WindowManager.LayoutParams _layoutParamAction;
     private String currentState;
+    private String visibleViewActionState;
     private ScenarioDataHelper scenarioDataHelper;
     private Config lastConfig;
 
@@ -61,6 +63,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private ImageView btn_action_minus;
     private ImageView btn_action_close;
     private ImageView btn_action_add;
+    private ImageView btn_action_hide;
 
     private ArrayList<View> viewActionList;
     private ArrayList<View> viewDrawerList;
@@ -101,6 +104,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         btn_action_minus = floatingControlView.findViewById(R.id.action_minus);
         btn_action_add = floatingControlView.findViewById(R.id.action_add);
         btn_action_close = floatingControlView.findViewById(R.id.action_close);
+        btn_action_hide = floatingControlView.findViewById(R.id.action_hide);
 
         // set action listener
         btn_action_play.setOnClickListener(this);
@@ -112,13 +116,14 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         btn_action_minus.setOnClickListener(this);
         btn_action_add.setOnClickListener(this);
         btn_action_close.setOnClickListener(this);
+        btn_action_hide.setOnClickListener(this);
 
         _windowManager = (WindowManager) _context.getSystemService(Context.WINDOW_SERVICE);
     }
 
     public void showFloatingControlView(int idConfig){
 
-
+        visibleViewActionState = "show";
 
         // clear all views
         viewActionList.clear();
@@ -230,8 +235,8 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         _layoutParam.format = PixelFormat.RGBA_8888;
         _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-        _layoutParam.width = (int) (width * (0.10f));
-        _layoutParam.height = (int) (height * (0.75f));
+        _layoutParam.width = LayoutParams.WRAP_CONTENT;
+        _layoutParam.height = LayoutParams.WRAP_CONTENT;
         _windowManager.addView(floatingControlView, _layoutParam);
 
     }
@@ -251,21 +256,20 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         TextView number_action = actionClickView.findViewById(R.id.number_action_click);
         number_action.setText(String.valueOf(indexChildView));
 
-        _layoutParam = new WindowManager.LayoutParams();
-        _layoutParam.gravity = Gravity.TOP | Gravity.LEFT;
-
+        _layoutParamAction = new WindowManager.LayoutParams();
+        _layoutParamAction.gravity = Gravity.LEFT | Gravity.TOP;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
-        _layoutParam.format = PixelFormat.RGBA_8888;
-        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+        _layoutParamAction.format = PixelFormat.RGBA_8888;
+        _layoutParamAction.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-        _layoutParam.width = LayoutParams.WRAP_CONTENT;
-        _layoutParam.height = LayoutParams.WRAP_CONTENT;
-        _windowManager.addView(actionClickView, _layoutParam);
+        _layoutParamAction.width = LayoutParams.WRAP_CONTENT;
+        _layoutParamAction.height = LayoutParams.WRAP_CONTENT;
+        _windowManager.addView(actionClickView, _layoutParamAction);
 
         Scenario scenario = new Scenario();
         scenario.setType("click");
@@ -274,7 +278,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
         actionClickView.setOnTouchListener(new View.OnTouchListener() {
 
-            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = _layoutParam;
+            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = _layoutParamAction;
             double x;
             double y;
             double px;
@@ -325,30 +329,30 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     public void addActionDrawSwipe(){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
         LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup drawSwipeLayoutView = (ViewGroup) inflater.inflate(R.layout.draw_layout_view,null);
 
-        _layoutParam = new WindowManager.LayoutParams();
-        _layoutParam.gravity = Gravity.CENTER;
+        _layoutParamAction = new WindowManager.LayoutParams();
+        _layoutParamAction.gravity = Gravity.CENTER;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
-        _layoutParam.format = PixelFormat.RGBA_8888;
-        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+        _layoutParamAction.format = PixelFormat.RGBA_8888;
+        _layoutParamAction.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-        _layoutParam.width = LayoutParams.MATCH_PARENT;
-        _layoutParam.height = LayoutParams.MATCH_PARENT;
+        _layoutParamAction.width = LayoutParams.MATCH_PARENT;
+        _layoutParamAction.height = LayoutParams.MATCH_PARENT;
 
-        _windowManager.addView(drawSwipeLayoutView,_layoutParam);
+        _windowManager.addView(drawSwipeLayoutView,_layoutParamAction);
         drawSwipeLayoutView.addView(new DrawingView(getContext()));
         viewDrawerList.add(drawSwipeLayoutView);
 
@@ -358,9 +362,9 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
     private void drawSwipePosition(float xStart,float yStart,float xEnd,float yEnd){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
         if(viewDrawerList.size() > 0){
@@ -382,7 +386,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         WindowManager.LayoutParams floatWindowLayoutParamStart = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                _layoutParam.type,
+                _layoutParamAction.type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
@@ -399,7 +403,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         WindowManager.LayoutParams floatWindowLayoutParamEnd = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                _layoutParam.type,
+                _layoutParamAction.type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
@@ -421,7 +425,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         WindowManager.LayoutParams floatWindowParentLayoutParam = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                _layoutParam.type,
+                _layoutParamAction.type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
@@ -484,16 +488,9 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         switch (view.getId()){
             case R.id.action_play:
                 currentState = ActionControlService.PLAY;
-                int[] location = new int[2];
-                floatingControlView.getLocationOnScreen(location);
-                intent.putExtra("x", location[0] - 1);
-                intent.putExtra("y", location[1] - 1);
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.PLAY);
                 break;
             case R.id.action_pause:
-                _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR |
-                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 currentState = ActionControlService.STOP;
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.STOP);
                 break;
@@ -517,6 +514,23 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
                 break;
             case R.id.action_save:
                 intent.putExtra(ActionControlService.ACTION, ActionControlService.SAVE);
+                break;
+            case R.id.action_hide:
+
+                if(visibleViewActionState.equals("show")){
+                    for(int i = 0; i <viewActionList.size(); i++){
+                        viewActionList.get(i).setVisibility(View.GONE);
+                    }
+                    visibleViewActionState = "hide";
+
+                    Log.i(ACTIVITY_TAG,"HIDE");
+                }else{
+                    Log.i(ACTIVITY_TAG,"SHOW");
+                    for(int i = 0; i <viewActionList.size(); i++){
+                        viewActionList.get(i).setVisibility(View.VISIBLE);
+                    }
+                    visibleViewActionState = "show";
+                }
                 break;
         }
 
@@ -774,23 +788,23 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         TextView number_action = actionClickView.findViewById(R.id.number_action_click);
         number_action.setText(String.valueOf(indexChildView));
 
-        _layoutParam = new WindowManager.LayoutParams();
-        _layoutParam.gravity = Gravity.TOP | Gravity.LEFT;
-        _layoutParam.x = xStart;
-        _layoutParam.y = yStart;
+        _layoutParamAction = new WindowManager.LayoutParams();
+        _layoutParamAction.gravity = Gravity.TOP | Gravity.LEFT;
+        _layoutParamAction.x = xStart;
+        _layoutParamAction.y = yStart;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
-        _layoutParam.format = PixelFormat.RGBA_8888;
-        _layoutParam.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+        _layoutParamAction.format = PixelFormat.RGBA_8888;
+        _layoutParamAction.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-        _layoutParam.width = LayoutParams.WRAP_CONTENT;
-        _layoutParam.height = LayoutParams.WRAP_CONTENT;
-        _windowManager.addView(actionClickView, _layoutParam);
+        _layoutParamAction.width = LayoutParams.WRAP_CONTENT;
+        _layoutParamAction.height = LayoutParams.WRAP_CONTENT;
+        _windowManager.addView(actionClickView, _layoutParamAction);
 
         Scenario scenario = new Scenario();
         scenario.setType("click");
@@ -801,7 +815,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
         actionClickView.setOnTouchListener(new View.OnTouchListener() {
 
-            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = _layoutParam;
+            final WindowManager.LayoutParams floatWindowLayoutUpdateParam = _layoutParamAction;
             double x;
             double y;
             double px;
@@ -857,9 +871,9 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         int yEnd= (int) Float.parseFloat(configDetail.getyY());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
         }
 
         if(viewDrawerList.size() > 0){
@@ -881,7 +895,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         WindowManager.LayoutParams floatWindowLayoutParamStart = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                _layoutParam.type,
+                _layoutParamAction.type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
@@ -898,7 +912,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         WindowManager.LayoutParams floatWindowLayoutParamEnd = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                _layoutParam.type,
+                _layoutParamAction.type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
@@ -920,7 +934,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         WindowManager.LayoutParams floatWindowParentLayoutParam = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                _layoutParam.type,
+                _layoutParamAction.type,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );

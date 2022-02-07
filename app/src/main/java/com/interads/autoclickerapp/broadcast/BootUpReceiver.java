@@ -20,22 +20,25 @@ public class BootUpReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        String packageNameApp = "com.idntimes.idntimes";
+        String packageNameApp = "";
         Boolean statusConfigApp = true;
+        String idConfigApp = "";
 
         ArrayList<HashMap<String,String>> rows = scenarioDataHelper.getAllDataConfig();
         for(int i = 0; i < rows.size();i++){
             if(rows.get(i).get("status").equals("1")){
-                packageNameApp = rows.get(i).get("");
+                packageNameApp = rows.get(i).get("app");
                 statusConfigApp = true;
+                idConfigApp = rows.get(i).get("id");
             }
         }
 
         // check config status app
         // format data params intent
-        // {status_config_app:Boolean,package_name_app:String,broadcast_type:String}
+        // {id_config_app,status_config_app:Boolean,package_name_app:String,broadcast_type:String}
         if(!packageNameApp.equals("") && statusConfigApp == true){
             Intent intentApp = new Intent(context, MainActivity.class);
+            intent.putExtra("id_config_app",idConfigApp);
             intentApp.putExtra("status_config_app",statusConfigApp);
             intentApp.putExtra("package_name_app",packageNameApp);
             intentApp.putExtra("broadcast_type","BOOT_UP");
