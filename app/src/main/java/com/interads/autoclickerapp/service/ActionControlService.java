@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.graphics.Path;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
@@ -129,17 +131,20 @@ public class ActionControlService extends AccessibilityService {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void Tapping(Scenario scenario) {
+    public void Tapping(Scenario scenario) {
 
         float x = Float.parseFloat(String.valueOf(scenario.getX()).replace("-",""));
         float y = Float.parseFloat(String.valueOf(scenario.getY()).replace("-",""));
+
+        Log.i(ACTIVITY_TAG,"Services = "+this.getServiceInfo());
+        Log.i(ACTIVITY_TAG,"Context = "+this.getApplicationContext());
 
 
         Path path = new Path();
         path.moveTo(x, y);
         path.lineTo(x, y);
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, scenario.getTime(), scenario.getDuration());
+        GestureDescription.StrokeDescription clickstroke = new GestureDescription.StrokeDescription(path, 0, 50);
         builder.addStroke(clickstroke);
         GestureDescription gestureDescription = builder.build();
         Log.e(ACTIVITY_TAG,"built.");
@@ -163,7 +168,7 @@ public class ActionControlService extends AccessibilityService {
         Log.e(ACTIVITY_TAG,"The result is " + isDispatch);
     }
 
-    private void Swipe(Scenario scenario){
+    public void Swipe(Scenario scenario){
 
         float x = Float.parseFloat(String.valueOf(scenario.getX()).replace("-",""));
         float y = Float.parseFloat(String.valueOf(scenario.getY()).replace("-",""));
@@ -229,4 +234,11 @@ public class ActionControlService extends AccessibilityService {
 
     }
 
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+
+        Log.i(ACTIVITY_TAG,"Services On Connected = "+this.getServiceInfo());
+        Log.i(ACTIVITY_TAG,"Context On Connected = "+this.getApplicationContext());
+    }
 }

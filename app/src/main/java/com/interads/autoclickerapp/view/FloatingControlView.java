@@ -79,6 +79,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
 
         Log.i(ACTIVITY_TAG, "NEW CONFIG CONSTRUCT");
         ArrayList<HashMap<String, String>> rows = scenarioDataHelper.getAllDataConfig();
+        Log.i(ACTIVITY_TAG,"Size of config = "+rows.size());
         int lastRow = rows.size() - 1;
         String id = rows.get(lastRow).get("id");
         String name = rows.get(lastRow).get("name");
@@ -231,7 +232,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         _layoutParam.format = PixelFormat.RGBA_8888;
@@ -263,7 +264,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         _layoutParamAction.format = PixelFormat.RGBA_8888;
@@ -333,7 +334,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -345,7 +346,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         _layoutParamAction.format = PixelFormat.RGBA_8888;
@@ -366,7 +367,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         if (viewDrawerList.size() > 0) {
@@ -662,7 +663,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         _layoutParam.format = PixelFormat.RGBA_8888;
@@ -714,7 +715,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParam.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParam.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParam.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         _layoutParam.format = PixelFormat.RGBA_8888;
@@ -798,7 +799,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         _layoutParamAction.format = PixelFormat.RGBA_8888;
@@ -875,7 +876,7 @@ public class FloatingControlView extends FrameLayout implements View.OnClickList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             _layoutParamAction.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_TOAST;
+            _layoutParamAction.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
         if (viewDrawerList.size() > 0) {
